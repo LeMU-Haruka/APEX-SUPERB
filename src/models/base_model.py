@@ -13,11 +13,11 @@ class BaseModel:
     @torch.no_grad()
     def prompt_mode(
             self,
-            prompt,
+            instruction,
             audio,
             max_new_tokens=2048,
     ):
         raise NotImplementedError
 
-    def text_mode(self, prompt, text, max_new_tokens=2048):
+    def text_mode(self, instruction, text, max_new_tokens=2048):
         raise NotImplementedError
