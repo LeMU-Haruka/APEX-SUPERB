@@ -7,9 +7,13 @@ from src.models import models_map
 import json
 from tqdm import tqdm
 
+from src.models.mini_omni2 import MiniOmni2
+
 
 torch.backends.cuda.enable_mem_efficient_sdp(False)
 torch.backends.cuda.enable_flash_sdp(False)
+
+OUTPUT_DIR = './result'
 
 
 # def set_gpu(gpu_id):
@@ -53,7 +57,7 @@ def main():
     # data = data.cast_column("audio", Audio(sampling_rate=16_000))
 
     # load model
-    model = models_map[args.model](args.model_path)
+    model = MiniOmni2(args.model_path)
     # data = data.select([0,1,2,3,4,5])
 
     # if args.modality == 'ttft':
@@ -65,7 +69,10 @@ def main():
     for item in tqdm(data, total=len(data)):
         audio = item['audio']
         prompt = item['prompt']
-        pred = model.prompt_mode(prompt, audio)
+        if 'asr' in task:
+            pred = model.prompt_mode(prompt, audio)
+        else:
+            pred = model.chat_mode(prompt, audio)
         results.append({
             'file': item['filename'],
             'prompt': prompt,

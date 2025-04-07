@@ -172,3 +172,11 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# develop code
+debug.py
+upload_dataset.py
+huggingface_upload.ipynb
+.idea/
+.vscode/

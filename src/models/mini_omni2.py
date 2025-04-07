@@ -142,6 +142,29 @@ def get_input_ids_whisper_ATBatch(mel, leng, whispermodel, device):
     return torch.stack([audio_feature, audio_feature]), stacked_inputids
 
 
+def A1_T1(fabric, audio_feature, input_ids, leng, model, text_tokenizer, step):
+    with fabric.init_tensor():
+        model.set_kv_cache(batch_size=1)
+    tokenlist = generate_ASR(
+        model,
+        audio_feature,
+        input_ids,
+        [leng],
+        ["A1T1"],
+        max_returned_tokens=2048,
+        temperature=0.9,
+        top_k=1,
+        eos_id_a=_eoa,
+        eos_id_t=_eot,
+        pad_id_t=_pad_t,
+        shift=padded_text_vocabsize,
+        include_prompt=True,
+        generate_text=True,
+    )
+    model.clear_kv_cache()
+    return text_tokenizer.decode(torch.tensor(tokenlist)).strip()
+
+
 def A1_T2(fabric, audio_feature, input_ids, leng, model, text_tokenizer, max_new_tokens):
     with fabric.init_tensor():
         model.set_kv_cache(batch_size=1)
@@ -250,3 +273,13 @@ class MiniOmni2(BaseModel):
         input_ids = get_input_ids_TT(text, self.text_tokenizer)
         response = T1_T2(self.fabric, input_ids, self.model, self.text_tokenizer)
         return response
+
+
+    def chat_mode(self, audio, max_new_tokens=2048):
+        return self.generate_audio(audio, max_new_tokens)
+    
+    def prompt_mode(self, instruction, audio, max_new_tokens=2048):
+        mel, leng = self.load_audio(audio)
+        audio_feature, input_ids = get_input_ids_whisper(mel, leng, self.whispermodel, self.device, special_token_a=_pad_a, special_token_t=_asr)
+        output = A1_T1(self.fabric, audio_feature, input_ids ,leng, self.model, self.text_tokenizer).lower().replace(',','').replace('.','').replace('?','')
+        return output
