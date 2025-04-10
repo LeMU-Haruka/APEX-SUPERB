@@ -1,12 +1,19 @@
-from transformers import Qwen2AudioForConditionalGeneration, AutoProcessor
-
+import torch
+from transformers import Qwen2_5OmniModel, Qwen2_5OmniProcessor
+from qwen_omni_utils import process_mm_info
 from src.models.base_model import BaseModel
 
 
-class Qwen2Audio(BaseModel):
+class Qwen25Omni(BaseModel):
     def __init__(self, llm_path='Qwen/Qwen2-Audio-7B-Instruct'):
-        self.processor = AutoProcessor.from_pretrained(llm_path, cache_dir='./cache')
-        self.model = Qwen2AudioForConditionalGeneration.from_pretrained(llm_path, device_map="cuda", cache_dir='./cache', torch_dtype='auto')
+        self.processor = Qwen2_5OmniProcessor.from_pretrained(llm_path)
+        self.model = Qwen2_5OmniModel.from_pretrained(llm_path, 
+                                                      torch_dtype="auto", 
+                                                      device_map="auto", 
+                                                      attn_implementation="flash_attention_2",
+                                                      )
+        self.model.to("cuda")
+
 
     def chat_mode(
         self,
@@ -24,7 +31,7 @@ class Qwen2Audio(BaseModel):
         inputs = self.processor(text=inputs, audios=audios, return_tensors="pt", padding=True)
         inputs = inputs.to("cuda")
 
-        generate_ids = self.model.generate(**inputs, max_length=max_new_tokens)
+        generate_ids = self.model.generate(**inputs, return_audio=False)
         generate_ids = generate_ids[:, inputs.input_ids.size(1):]
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
@@ -34,22 +41,22 @@ class Qwen2Audio(BaseModel):
             self,
             prompt,
             audio,
-            sr,
             max_new_tokens=2048,
     ):
         conversation = [
-            {"role": "user", "content": [
-                {"type": "audio", "audio_url": ""},
+            {"role": "user", 
+             "content": [
+                {"type": "audio", "audio": audio},
                 {"type": "text", "text": prompt},
             ]}
         ]
-        audios = [audio]
-        inputs = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
+        text = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
+        audios, images, videos = process_mm_info(conversation, use_audio_in_video=False)
 
-        inputs = self.processor(text=inputs, audios=audios, return_tensors="pt", padding=True)
-        inputs = inputs.to(self.model.device)
+        inputs = self.processor(text=text, audios=audios, images=images, videos=videos, return_tensors="pt", padding=True, use_audio_in_video=False)
+        inputs = inputs.to(self.model.device).to(self.model.dtype)
 
-        generate_ids = self.model.generate(**inputs, max_length=max_new_tokens)
+        generate_ids = self.model.generate(**inputs, max_length=max_new_tokens, return_audio=False)
         generate_ids = generate_ids[:, inputs.input_ids.size(1):]
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
@@ -74,3 +81,4 @@ class Qwen2Audio(BaseModel):
 
 
 # debug
+

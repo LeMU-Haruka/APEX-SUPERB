@@ -9,20 +9,23 @@ from src.datasets.utils import load_audio_file
 
 
 class BaseDataset(Dataset):
-    def __init__(self, root, task):
+    def __init__(self, args):
         super(BaseDataset, self).__init__()
-        self.root = root
-        self.task = task
+        from src.datasets import DATASET_PATH_CONFIG
+
+        self.root = DATASET_PATH_CONFIG[args.task]
+        self.task = args.task
+        self.model = args.model
         file_list = []
-        if not os.path.isdir(root):
-            file_list.append(root)
+        if not os.path.isdir(self.root):
+            file_list.append(self.root)
             # 去除最后的文件名，保留前面的路径
-            self.root = os.path.dirname(root)
+            self.root = os.path.dirname(self.root)
         else:
-            for index, dir, files in os.walk(root):
+            for index, dir, files in os.walk(self.root):
                 for file in files:
                     if file.endswith('.json'):
-                        json_path = os.path.join(root, file)
+                        json_path = os.path.join(self.root, file)
                         file_list.append(json_path)
         print('Find {} meta files'.format(len(file_list)))
         self.items = self.load_data(file_list)
@@ -38,11 +41,16 @@ class BaseDataset(Dataset):
     def __getitem__(self, index):
         item = self.items[index]
         audio, sr = load_audio_file(os.path.join(self.root, item['filename']))
+        item['sr'] = sr
         item['audio'] = audio
         # 判断item是否包含prompt字段
         if 'prompt' not in item:
             prompt = TASK_PROMPTS[self.task]
             item['prompt'] = prompt
+        item['kargs'] = {}
+        for key in item.keys():
+            if key not in ['audio', 'prompt', 'filename', 'question', 'answer']:
+                item['kargs'][key] = item[key]
         return item
 
     def __len__(self):
@@ -51,24 +59,58 @@ class BaseDataset(Dataset):
 
 class HFDataset(BaseDataset):
 
-    def __init__(self, root, task):
-        super(HFDataset, self).__init__(root, task)
-        self.task = task
-        self.items = load_dataset(root, split='test')
+    def __init__(self, args):
+        # super(HFDataset, self).__init__(root, task)
+        self.task = args.task
+        self.model = args.model
+        from src.datasets import DATASET_PATH_CONFIG
+        self.root = DATASET_PATH_CONFIG[args.task]
+        self.items = load_dataset(self.root, split='test')
 
     def __getitem__(self, index):
         item = self.items[index]
         # prompt = TASK_PROMPTS[self.task]
+        item['sr'] = item["audio"]["sampling_rate"]
         item['audio'] = item['audio']['array']
         item['prompt'] = item['instruction']
+        # answer从label或answer字段中获取
         item['answer'] = item['label']
         item['filename'] = item['file']
         if 'transcript' in item:
             item['question'] = item['transcript']
         else:
             item['question'] = 'no transcript'
+        # 将多余字段保存在kargs中
+        item['kargs'] = {}
+        for key in item.keys():
+            if key not in ['audio', 'prompt', 'filename', 'question', 'answer']:
+                item['kargs'][key] = item[key]
         return item
 
+
+# class HFChoiceDataset(BaseDataset):
+
+#     def __init__(self, root, task):
+#         # super(HFDataset, self).__init__(root, task)
+#         self.task = task
+#         self.items = load_dataset(root, split='test')
+
+#     def __getitem__(self, index):
+#         item = self.items[index]
+#         # prompt = TASK_PROMPTS[self.task]
+#         item['audio'] = item['audio']['array']
+#         item['prompt'] = item['instruction']
+#         choice = item['choices']
+#         # 将 choice的每一个选项转换成 A.xxx B.xxx C.xxx D.xxx 的字符串形式
+
+
+#         item['prompt'] = item['prompt'] + ' ' + choice
+#         item['filename'] = item['id']
+#         if 'transcript' in item:
+#             item['question'] = item['transcript']
+#         else:
+#             item['question'] = 'no transcript'
+#         return item
 
 
 class ChoiceDataset(BaseDataset):

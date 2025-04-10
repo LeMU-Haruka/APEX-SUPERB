@@ -1,5 +1,7 @@
 from .base_dataset import BaseDataset, ChoiceDataset, HFDataset
 
+# BASE_TASK_CONFIG_LIST = []
+
 datasets_map = {
     'mmlu': BaseDataset,
     'alpaca_eval': BaseDataset,
@@ -22,6 +24,7 @@ datasets_map = {
     'fewshot_gsm8k_4': BaseDataset,
     'fewshot_gsm8k_8': BaseDataset,
     'librispeech_noise': BaseDataset,
+    'mmau': HFDataset,
 }
 
 
@@ -47,4 +50,5 @@ DATASET_PATH_CONFIG = {
     'fewshot_gsm8k_4': '/userhome/datasets/SGBench/gsm8k_tts',
     'fewshot_gsm8k_8': '/userhome/datasets/SGBench/gsm8k_tts',
     'librispeech_noise': '/userhome/datasets/SGBench/librispeech_noise',
+    'mmau': '/userhome/datasets/SGBench/mmau'
 }

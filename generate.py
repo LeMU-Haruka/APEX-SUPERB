@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 import torch
 
-from src.datasets import datasets_map, DATASET_PATH_CONFIG
+from src.datasets import datasets_map
 from src.models import models_map
 import json
 from tqdm import tqdm
@@ -47,7 +47,7 @@ def main():
     # if task == 'asr':
     #     data = load_asr_data()
     # else:
-    data = datasets_map[task](DATASET_PATH_CONFIG[task], task)
+    data = datasets_map[task](args)
     # load data
     # data = load_dataset('hlt-lab/voicebench', args.data, split=args.split)
     # data = data.cast_column("audio", Audio(sampling_rate=16_000))
@@ -65,13 +65,15 @@ def main():
     for item in tqdm(data, total=len(data)):
         audio = item['audio']
         prompt = item['prompt']
+        sr = item['sr']
         pred = model.prompt_mode(prompt, audio)
         results.append({
             'file': item['filename'],
             'prompt': prompt,
             'question': item['question'],
             'pred': pred,
-            'target': item['answer']
+            'target': item['answer'],
+            'kargs': item['kargs'],
         })
 
     # save results
