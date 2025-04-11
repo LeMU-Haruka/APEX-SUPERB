@@ -6,6 +6,7 @@ class BaseModel:
     def chat_mode(
             self,
             audio,
+            sr,
             max_new_tokens=2048,
     ):
         raise NotImplementedError
@@ -15,6 +16,7 @@ class BaseModel:
             self,
             instruction,
             audio,
+            sr,
             max_new_tokens=2048,
     ):
         raise NotImplementedError

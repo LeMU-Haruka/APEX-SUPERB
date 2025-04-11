@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import torch
 from src.models.base_model import BaseModel
 from transformers import WhisperFeatureExtractor
@@ -27,8 +28,11 @@ class SALMONN(BaseModel):
         self.cfg.config.model.ckpt = os.path.join(model_path, 'salmonn_v1.pth')
         self.cfg.config.bert_path = os.path.join(model_path, 'bert-base-cased')
 
-    def prepare_one_sample(self, audio):
+    def prepare_one_sample(self, audio, sr):
         spectrogram = self.wav_processor(audio, return_tensors="pt")["input_features"]
+        if len(audio) < sr: # pad audio to at least 1s
+            sil = np.zeros(sr - len(audio), dtype=float)
+            audio = np.concatenate((audio, sil), axis=0)
         samples = {
             "spectrogram": spectrogram,
             "raw_wav": torch.from_numpy(audio).unsqueeze(0),
@@ -63,9 +67,10 @@ class SALMONN(BaseModel):
             self,
             prompt,
             audio,
+            sr,
             max_new_tokens=2048,
             ):
-        samples = self.prepare_one_sample(audio) 
+        samples = self.prepare_one_sample(audio, sr) 
         prompt = [
             self.cfg.config.model.prompt_template.format("<Speech><SpeechHere></Speech> " + prompt.strip())
         ]

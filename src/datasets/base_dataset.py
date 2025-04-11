@@ -1,6 +1,7 @@
 import json
 import os
 
+import librosa
 from torch.utils.data.dataset import Dataset
 from datasets import load_dataset
 
@@ -41,7 +42,9 @@ class BaseDataset(Dataset):
     def __getitem__(self, index):
         item = self.items[index]
         audio, sr = load_audio_file(os.path.join(self.root, item['filename']))
-        item['sr'] = sr
+        if sr != 16000:
+            audio = librosa.resample(audio, orig_sr=sr, target_sr=16000)
+        item['sr'] = 16000
         item['audio'] = audio
         # 判断item是否包含prompt字段
         if 'prompt' not in item:
@@ -49,7 +52,7 @@ class BaseDataset(Dataset):
             item['prompt'] = prompt
         item['kargs'] = {}
         for key in item.keys():
-            if key not in ['audio', 'prompt', 'filename', 'question', 'answer']:
+            if key not in ['audio', 'prompt', 'filename', 'question', 'answer', 'kargs']:
                 item['kargs'][key] = item[key]
         return item
 
@@ -70,8 +73,13 @@ class HFDataset(BaseDataset):
     def __getitem__(self, index):
         item = self.items[index]
         # prompt = TASK_PROMPTS[self.task]
-        item['sr'] = item["audio"]["sampling_rate"]
-        item['audio'] = item['audio']['array']
+        sr = item["audio"]["sampling_rate"]
+        array = item["audio"]["array"]
+        # resample all audio to 16k for a fair comparison
+        if sr != 16000:
+            array = librosa.resample(array, orig_sr=sr, target_sr=16000)
+        item['sr'] = 16000
+        item['audio'] = array
         item['prompt'] = item['instruction']
         # answer从label或answer字段中获取
         item['answer'] = item['label']
@@ -81,10 +89,7 @@ class HFDataset(BaseDataset):
         else:
             item['question'] = 'no transcript'
         # 将多余字段保存在kargs中
-        item['kargs'] = {}
-        for key in item.keys():
-            if key not in ['audio', 'prompt', 'filename', 'question', 'answer']:
-                item['kargs'][key] = item[key]
+        item['kargs'] = item['kargs'] if 'kargs' in item else {}
         return item
 
 

@@ -1,4 +1,3 @@
-import torch
 from transformers import Qwen2_5OmniModel, Qwen2_5OmniProcessor
 from qwen_omni_utils import process_mm_info
 from src.models.base_model import BaseModel
@@ -41,6 +40,7 @@ class Qwen25Omni(BaseModel):
             self,
             prompt,
             audio,
+            sr,
             max_new_tokens=2048,
     ):
         conversation = [

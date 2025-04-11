@@ -11,20 +11,17 @@ from src.models.base_model import BaseModel
 
 
 # BAICHUAN_PATH = "baichuan-inc/Baichuan-Omni-1d5"
-BAICHUAN_PATH = "E:\models\Baichuan-Audio-Instruct"
-BAICHUAN_PATH = "/userhome/models/Baichuan-Audio-Instruct"
+class BaichuanAudio(BaseModel):
 
-class Baichuan(BaseModel):
-    def __init__(self):
-        self.sampling_rate = 24000
+    def __init__(self, llm_path='/userhome/models/Baichuan-Audio-Instruct'):
         self.role_prefix = {
             'system': '<B_SYS>',
             'user': '<C_Q>',
             'assistant': '<C_A>',
             'audiogen': '<audiotext_start_baichuan>'
         }
-        self.model = AutoModelForCausalLM.from_pretrained(BAICHUAN_PATH, trust_remote_code=True, torch_dtype=torch.bfloat16).cuda()
-        self.tokenizer = AutoTokenizer.from_pretrained(BAICHUAN_PATH, trust_remote_code=True)
+        self.model = AutoModelForCausalLM.from_pretrained(llm_path, trust_remote_code=True, torch_dtype=torch.bfloat16).cuda()
+        self.tokenizer = AutoTokenizer.from_pretrained(llm_path, trust_remote_code=True)
         self.model.training = False
         self.model.bind_processor(self.tokenizer, training=False, relative_path="/")
         self.audio_start_token = self.tokenizer.convert_ids_to_tokens(self.model.config.audio_config.audio_start_token_id)
@@ -39,15 +36,17 @@ class Baichuan(BaseModel):
         text += self.role_prefix["assistant"]
         return text
 
-    def generate_audio(
+    def prompt_mode(
         self,
+        prompt,
         audio,
+        sr,
         max_new_tokens=2048,
     ):
         with tempfile.NamedTemporaryFile(delete=False, suffix=f".wav") as temp_file:
             temp_filename = temp_file.name
             # Write the audio data to the file
-            sf.write(temp_file.name, audio['array'], audio['sampling_rate'], format='wav')
+            sf.write(temp_file.name, audio, sr, format='wav')
 
         g_history = []
 

@@ -32,7 +32,7 @@ def main():
     # parser.add_argument('--gpu', type=int, default=0)
     args = parser.parse_args()
 
-    output_dir = args.model_path + '_result'
+    output_dir = args.model + '_result'
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -66,7 +66,7 @@ def main():
         audio = item['audio']
         prompt = item['prompt']
         sr = item['sr']
-        pred = model.prompt_mode(prompt, audio)
+        pred = model.prompt_mode(prompt, audio, sr)
         results.append({
             'file': item['filename'],
             'prompt': prompt,
