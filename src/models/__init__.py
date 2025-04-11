@@ -1,4 +1,5 @@
 from src.models.baichuan import BaichuanAudio
+from src.models.cascaded_model import CascadedModel
 from src.models.gemini import GeminiAudio
 from src.models.glm4voice import Glm4Voice
 from src.models.mini_omni2 import MiniOmni2
@@ -7,6 +8,7 @@ from src.models.qwen25_omni import Qwen25Omni
 from src.models.salmonn import SALMONN
 
 models_map = {
+    'cascaded_model': CascadedModel,
     'qwen2-audio': Qwen2Audio,
     'baichuan_audio': BaichuanAudio,
     'mini-omni2': MiniOmni2,

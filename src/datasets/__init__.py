@@ -13,6 +13,7 @@ datasets_map = {
     # sound
     'sound_classification': HFDataset,
     'animal_classification': HFDataset,
+    
     ### Instruction tasks ###
     # multi-instruct
     'text_instruct_asr': BaseDataset,
