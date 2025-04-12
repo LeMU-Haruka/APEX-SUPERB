@@ -90,6 +90,9 @@ class HFDataset(BaseDataset):
             item['question'] = 'no transcript'
         # 将多余字段保存在kargs中
         item['kargs'] = item['kargs'] if 'kargs' in item else {}
+        for key in item.keys():
+            if key not in ['audio', 'prompt', 'filename', 'question', 'answer', 'kargs']:
+                item['kargs'][key] = item[key]
         return item
 
 
