@@ -12,9 +12,11 @@ model_path=$2
 gpu_id=$3
 group=$4
 
+
+num_groups=4
 # 判断 group 参数是否在 0~3 范围内
-if ! [[ "$group" =~ ^[0-3]$ ]]; then
-  echo "错误：group 参数必须在 0 到 3 之间"
+if ! [[ "$group" =~ ^[0-9]+$ ]] || [ "$group" -ge "$num_groups" ] || [ "$group" -lt 0 ]; then
+  echo "错误：group 参数必须在 0 到 $((num_groups - 1)) 之间"
   exit 1
 fi
 
@@ -61,7 +63,7 @@ tasks=(
 )
 
 total=${#tasks[@]}
-num_groups=4
+
 
 # 计算每组的基本大小和余数，以实现尽可能均衡的拆分
 base=$(( total / num_groups ))
