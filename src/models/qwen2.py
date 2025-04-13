@@ -11,10 +11,10 @@ class Qwen2Audio(BaseModel):
     def chat_mode(
         self,
         audio,
+        sr,
         max_new_tokens=2048,
     ):
-        assert audio['sampling_rate'] == 16000
-        audio = audio['array']
+        assert sr == 16000
         content = [{"type": "audio", "audio_url": 'audio_url'}]
         conversation = [
             {"role": "user", "content": content},

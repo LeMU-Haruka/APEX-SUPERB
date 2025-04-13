@@ -31,7 +31,7 @@ tasks=(
     "asr_commonvoice"
     "asr_librispeech"
 
-    "dialogue_ser",
+    "dialogue_ser"
     "emotion_recognition"
 
     "animal_classification"
@@ -40,6 +40,7 @@ tasks=(
     # instruction tasks
     "text_instruct_st"
     "text_instruct_asr"
+    "speech_instruct_asr"
     "ifeval"
     "gsm8k_fewshot_1"
     "gsm8k_fewshot_2"

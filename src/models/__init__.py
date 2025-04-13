@@ -6,6 +6,7 @@ from src.models.mini_omni2 import MiniOmni2
 from src.models.qwen2 import Qwen2Audio
 from src.models.qwen25_omni import Qwen25Omni
 from src.models.salmonn import SALMONN
+from src.models.phi4 import Phi4Multimodal
 
 models_map = {
     'cascaded_model': CascadedModel,
@@ -16,4 +17,5 @@ models_map = {
     'salmonn': SALMONN, # https://github.com/bytedance/SALMONN
     'gemini': GeminiAudio, # gemini api
     'glm': Glm4Voice, # https://huggingface.co/THUDM/glm-4-voice-9b
+    'phi4': Phi4Multimodal, # https://huggingface.co/microsoft/Phi-4-multimodal-instruct
 }

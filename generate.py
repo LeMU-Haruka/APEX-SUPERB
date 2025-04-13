@@ -67,7 +67,10 @@ def main():
         audio = item['audio']
         prompt = item['instruction']
         sr = item['sr']
-        pred = model.prompt_mode(prompt, audio, sr)
+        if task == 'speech_instruct_asr':
+            pred = model.chat_mode(audio, sr)
+        else:
+            pred = model.prompt_mode(prompt, audio, sr)
         results.append({
             'file': item['file'],
             'prompt': prompt,

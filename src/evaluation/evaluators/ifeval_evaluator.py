@@ -1,0 +1,29 @@
+
+
+import json
+import os
+
+from tqdm import tqdm
+from src.evaluation.api import CLIENT_MAP
+from src.evaluation.evaluators.evaluator import Evaluator
+from src.evaluation.metrics.ifeval import ifeval_metric
+
+class IfevalEvaluator(Evaluator):
+    def __init__(self, model_name, meta_file, evaluator, api, is_align=True, cache_dir='./cache'):
+        self.model_name = model_name
+        self.cache_dir = cache_dir
+        self.evaluator = evaluator
+        self.meta_file = meta_file
+        self.client = CLIENT_MAP[api]()
+        self.metric = ifeval_metric
+
+
+    def evaluate(self, data):
+        print(f"Processing evaluation for model '{self.model_name}' on evaluator: '{self.evaluator}'")
+        scores = self.metric(self.client, data)
+        return {
+                'model': self.model_name,
+                'meta_file': self.meta_file,
+                'task': self.evaluator,
+                'score': scores,
+            }

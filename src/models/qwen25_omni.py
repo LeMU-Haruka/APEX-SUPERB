@@ -9,7 +9,7 @@ class Qwen25Omni(BaseModel):
         self.model = Qwen2_5OmniModel.from_pretrained(llm_path, 
                                                       torch_dtype="auto", 
                                                       device_map="auto", 
-                                                      attn_implementation="flash_attention_2",
+                                                      attn_implementation="eager",
                                                       )
         self.model.to("cuda")
 

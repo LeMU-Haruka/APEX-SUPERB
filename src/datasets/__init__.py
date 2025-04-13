@@ -20,7 +20,6 @@
 #     'text_instruct_st': BaseDataset,
 
 #     # speech instruction
-#     # TODO
 #     # IFEval
 #     'ifeval': BaseDataset,
 

@@ -16,6 +16,7 @@ datasets = [
     # instruction tasks
     "text_instruct_st",
     "text_instruct_asr",
+    "speech_instruct_asr",
     "ifeval",
 
     # input robustness tasks
@@ -37,7 +38,12 @@ datasets = [
 output_dir = 'local_datasets'
 os.makedirs(output_dir, exist_ok=True)
 
+
+
 for task in datasets:
+    if os.path.exists(os.path.join(output_dir, task)):
+        print(f'{task} already exists, skip download')
+        continue
     repo = f'LeMUHaruka/{task}'
     dataset = load_dataset(repo, split='test')
 
