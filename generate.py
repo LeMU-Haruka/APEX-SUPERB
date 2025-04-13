@@ -2,15 +2,18 @@ import os
 from argparse import ArgumentParser
 import torch
 
-from src.datasets import datasets_map
+# from src.datasets import datasets_map
+from src.datasets.base_dataset import HFDataset
 from src.models import models_map
 import json
 from tqdm import tqdm
 
+from src.utils import set_seed
 
-torch.backends.cuda.enable_mem_efficient_sdp(False)
-torch.backends.cuda.enable_flash_sdp(False)
+# torch.backends.cuda.enable_mem_efficient_sdp(False)
+# torch.backends.cuda.enable_flash_sdp(False)
 
+set_seed(42)
 
 # def set_gpu(gpu_id):
 #     """
@@ -36,8 +39,6 @@ def main():
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    # 将任务运行在指定GPU上
-    # os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
 
     task = args.task
     # 遍历打印参数
@@ -47,7 +48,7 @@ def main():
     # if task == 'asr':
     #     data = load_asr_data()
     # else:
-    data = datasets_map[task](args)
+    data = HFDataset(task, args.model)
     # load data
     # data = load_dataset('hlt-lab/voicebench', args.data, split=args.split)
     # data = data.cast_column("audio", Audio(sampling_rate=16_000))
@@ -64,15 +65,15 @@ def main():
     results = []
     for item in tqdm(data, total=len(data)):
         audio = item['audio']
-        prompt = item['prompt']
+        prompt = item['instruction']
         sr = item['sr']
         pred = model.prompt_mode(prompt, audio, sr)
         results.append({
-            'file': item['filename'],
+            'file': item['file'],
             'prompt': prompt,
-            'question': item['question'],
+            'question': item['text'],
             'pred': pred,
-            'target': item['answer'],
+            'target': item['label'],
             'kargs': item['kargs'],
         })
 

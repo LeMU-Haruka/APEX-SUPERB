@@ -25,29 +25,39 @@ export CUDA_VISIBLE_DEVICES=$gpu_id
 
 # 定义你要遍历的 task 列表
 tasks=(
-  "mmlu"
-  "alpaca_eval"
-  "asr_librispeech"
-  "asr_commonvoice"
-  "gsm8k"
-  "emotion"
-  "dialogue_ser"
-  "AED"
-  "anaimal_classification"
-  "librispeech_multispeaker"
-  "librispeech_emotion"
-  "text_instruct_asr"
-  "text_instruct_st"
-  "empathy"
-  "speaker_role"
-  "librispeech_speed"
-  "ifeval"
-  "fewshot_gsm8k_1"
-  "fewshot_gsm8k_2"
-  "fewshot_gsm8k_4"
-  "fewshot_gsm8k_8"
-  "librispeech_noise"
-  "mmau"
+    # basic tasks
+    "asr_commonvoice"
+    "asr_librispeech"
+
+    "dialogue_ser",
+    "emotion_recognition"
+
+    "animal_classification"
+    "sound_classification"
+
+    # instruction tasks
+    "text_instruct_st"
+    "text_instruct_asr"
+    "ifeval"
+    "gsm8k_fewshot_1"
+    "gsm8k_fewshot_2"
+    "gsm8k_fewshot_4"
+    "gsm8k_fewshot_8"
+
+    # input robustness tasks
+    "librispeech_noise"
+    "librispeech_emotion"
+    "librispeech_speed"
+    "librispeech_multispeaker"
+
+    
+    # QA and reasoning tasks
+    "gsm8k"
+    "alpaca_empathy"
+    "mmlu"
+    "alpaca_eval"
+    "speaker_role"
+    "mmau"
 )
 
 total=${#tasks[@]}
