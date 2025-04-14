@@ -20,9 +20,11 @@ class Qwen25Omni(BaseModel):
         sr,
         max_new_tokens=2048,
     ):
-        content = [{"type": "audio", "audio_url": 'audio_url'}]
         conversation = [
-            {"role": "user", "content": content},
+            {"role": "user", 
+             "content": [
+                {"type": "audio", "audio": audio},
+            ]}
         ]
         text = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
         audios, images, videos = process_mm_info(conversation, use_audio_in_video=False)
