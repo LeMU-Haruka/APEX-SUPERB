@@ -3,7 +3,7 @@ import json
 
 from utils import extract_json
 
-
+CACHE_DIR = 'cache'
 
 GPT_CONTENT_SCORE_PROMPT = """
     You are an expert evaluator for large language models.
@@ -83,6 +83,7 @@ def gpt_content_score(client, data):
         prompt = build_content_score_prompt(item)
         response = client.generate_response(prompt)
         json_str = extract_json(response)
+        item['metric_response'] = response
         try:
             json_response = json.loads(json_str)
             fluency = json_response['fluency']
@@ -94,14 +95,25 @@ def gpt_content_score(client, data):
             print(response)
             print('#' * 20)
             print(json_str)
+            item['fluency'] = -1
+            item['relevance'] = -1
+            item['overall'] = -1
             continue
+        
         fluency_score += fluency
         relevance_score += relevance
-
         overall_score += overall
+        item['fluency'] = fluency
+        item['relevance'] = relevance
+        item['overall'] = overall
+
     fluency_score = fluency_score / len(data)
     relevance_score = relevance_score / len(data)
     overall_score = overall_score / len(data)
+    # 将结果保存到文件
+    json_str = json.dumps(data, indent=4) 
+    with open(f'./cache/gpt_content_score.json', 'w') as f:
+        f.write(json_str)
     return {
         'scores': {
             'fluency': fluency_score,

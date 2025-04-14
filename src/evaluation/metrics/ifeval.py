@@ -2,7 +2,7 @@ import json
 
 from utils import extract_json
 
-
+CACHE_DIR = 'cache'
 IFEVAL_PROMPT = """
     You are an evaluator for instruction-following tasks in LLMs.
     Given a question, an instruction, and a response, evaluate according to the following rules:
@@ -70,6 +70,7 @@ def ifeval_metric(client, data):
         prompt = build_ifeval_prompt(item)
         response = client.generate_response(prompt)
         json_str = extract_json(response)
+        item['metric_response'] = response
         try:
             json_response = json.loads(json_str)
             instruction_score = json_response['instruction_compliance']
@@ -80,12 +81,21 @@ def ifeval_metric(client, data):
             print(response)
             print('#' * 20)
             print(json_str)
+            item['if_rate'] = -1
+            item['content_score'] = -1
             continue
         if_rate += instruction_score
         content_score += relevance
+        item['if_rate'] = instruction_score
+        item['content_score'] = relevance
     if_rate = if_rate / len(data)
     content_score = content_score / len(data)
     fluency_score = fluency_score / len(data)
+
+    # 将结果保存到文件
+    json_str = json.dumps(data, indent=4)  # Convert list of dictionaries to JSON string
+    with open(f'{CACHE_DIR}/ifeval.json', 'w') as f:
+       f.write(json_str)    
     return {
         'scores': {
             'if_rate': if_rate,

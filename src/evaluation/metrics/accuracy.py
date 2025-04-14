@@ -4,6 +4,8 @@ import json
 from utils import extract_json
 
 
+CACHE_DIR = 'cache'
+
 ACCURACY_PROMPT = """
     You are an expert evaluator for large language models.
     Your task is to evaluate the factual accuracy of the response and its consistency with the ground truth.
@@ -55,17 +57,23 @@ def accuracy_metric_with_llm(client, data):
         prompt = build_prompt(item)
         response = client.generate_response(prompt)
         json_str = extract_json(response)
+        item['metric_response'] = response
         try:
             is_same = json.loads(json_str)['is_same']
+            item['is_same'] = is_same
         except BaseException as e:
             print("Response formant error")
             print(e)
             print(response)
             print('#' * 20)
             print(json_str)
-            continue
+            item['is_same'] = -1
             is_same = 0
+            continue
         correct += is_same
+    json_str = json.dumps(data, indent=4)  # Convert list of dictionaries to JSON string
+    with open(f'{CACHE_DIR}/accuracy.json', 'w') as f:
+        f.write(json_str)
     return correct / len(data)
 
 def build_prompt(item):
