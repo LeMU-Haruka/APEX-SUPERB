@@ -20,19 +20,15 @@ GPT_CONTENT_SCORE_PROMPT = """
     
     Response: [PRED]
     
-    Evaluation Criteria:
+    Evaluation from following ascpects:
         - Fluency: Is the response grammatically correct and natural-sounding? (1-5, 5 being best)
         - Relevance: Does the response directly and appropriately address the prompt and the utterance? (1-5, 5 being best)
-        - Coherence: Is the response logically organized and easy to follow? (1-5, 5 being best)
-        - Prompt Adherence: Does the response correctly fulfill the requirements of the prompt, considering the given utterance? (1-5, 5 being best)
         - Overall Score: Taking all factors into account, what is the overall quality of the response? (1-5, 5 being best)
         
     Provide your evaluation in the following JSON format:
     {
         "fluency": <score>,
         "relevance": <score>,
-        "coherence": <score>,
-        "prompt_adherence": <score>,
         "overall_score": <score>
         "details": <reason for each score>
     }
