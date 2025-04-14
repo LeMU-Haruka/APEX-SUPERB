@@ -39,8 +39,10 @@ def main():
             data = json.load(f)
         # evaluator = EVALUATOR_MAP[args.task]()
         if evaluator_type is None:
-            evaluator_type = file.split('-')[-1].split('.')[0]
-        evaluator = load_evaluator(evaluator_type, model_name, file, args.api, is_align=args.align)
+            e_type = file.split('-')[-1].split('.')[0]
+        else:
+            e_type = evaluator_type
+        evaluator = load_evaluator(e_type, model_name, file, args.api, is_align=args.align)
         result = evaluator.evaluate(data)
         print(result)
         results.append(result)
