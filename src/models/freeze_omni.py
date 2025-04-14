@@ -1,9 +1,8 @@
-from .base import VoiceAssistant
+from src.models.base_model import BaseModel
 import argparse
 import os
 import torch
 import math
-from loguru import logger
 import torchaudio.compliance.kaldi as k
 from huggingface_hub import snapshot_download
 
@@ -50,22 +49,25 @@ class audioEncoderProcessor:
         return self.input_chunk.clone()
 
 
-class FreezeOmniAssistant(VoiceAssistant):
-    def __init__(self):
-        if not os.path.exists("./cache/Freeze-Omni"):
+class FreezeOmni(BaseModel):
+    def __init__(self, llm_path='/userhome/models/Freeze-Omni'):
+        if not os.path.exists(llm_path):
             snapshot_download(
                 repo_id="VITA-MLLM/Freeze-Omni",
-                local_dir="./cache/Freeze-Omni",
+                local_dir=llm_path,
             )
-        if not os.path.exists("./cache/Qwen2-7B-Instruct"):
+        # can replace with your own qwen2-7B-instruct path
+        # qwen2_path = os.path.join(llm_path, 'Qwen2-7B-Instruct')
+        qwen2_path = '/userhome/models/Qwen2-7B-Instruct'
+        if not os.path.exists(qwen2_path):
             snapshot_download(
                 repo_id='Qwen/Qwen2-7B-Instruct',
-                local_dir="./cache/Qwen2-7B-Instruct",
+                local_dir=qwen2_path,
             )
 
         configs = argparse.Namespace(
-            model_path="./cache/Freeze-Omni/checkpoints",
-            llm_path="./cache/Qwen2-7B-Instruct",
+            model_path=os.path.join(llm_path, 'checkpoints'),
+            llm_path=qwen2_path,
             top_k=20,
             top_p=0.8,
             temperature=0.8,
@@ -75,17 +77,75 @@ class FreezeOmniAssistant(VoiceAssistant):
 
         self.audio_processor = audioEncoderProcessor()
 
-    def generate_audio(
+    def chat_mode(
         self,
         audio,
+        sr,
         max_new_tokens=2048,
     ):
-        wav = audio['array']
-        wav = torch.tensor(wav)
+        wav = torch.tensor(audio)
         # Satge0: preprocess
         # set system role, stat will be set to 'sl'
         stat = 'pre'
         outputs = self.pipeline.speech_dialogue(None, stat=stat, role="You are a helpful assistant.")
+        chunk_size = self.audio_processor.get_chunk_size()
+
+        # Satge1: start listen
+        # stat will be auto set to 'cl' after Stage1
+        wav_input = torch.zeros(math.ceil(wav.shape[0] / chunk_size) * chunk_size)
+        wav_input[:wav.shape[0]] = wav
+        for i in range(0, wav_input.shape[0], chunk_size):
+            fbank = self.audio_processor.process(wav_input[i:i + chunk_size])
+            outputs = self.pipeline.speech_dialogue(fbank, **outputs)
+            outputs['stat'] = 'cl'
+        self.audio_processor.reset()
+
+        outputs['adapter_cache'] = None
+        outputs['encoder_cache'] = None
+        outputs['pe_index'] = 0
+        outputs['stat'] = 'ss'
+
+        # Stage3: start speak
+        outputs = self.pipeline.speech_dialogue(None, **outputs)
+
+        whole_text = ''
+        last_text = ''
+
+        # Stage4: contiune speak until stat is set to 'sl'
+        # use 'stop' to interrupt generation, stat need to be manually set as 'sl'
+        stop = False
+        while True:
+            if len(outputs['past_tokens']) > max_new_tokens:
+                stop = True
+            if stop:
+                break
+            del outputs['text']
+            del outputs['hidden_state']
+            outputs = self.pipeline.speech_dialogue(None, **outputs)
+            if outputs['stat'] == 'cs':
+                whole_text += outputs['text'][len(last_text):]
+                # logger.info(len(outputs['past_tokens']))
+            if outputs['stat'] == 'sl':
+                break
+            last_text = outputs['text']
+
+        outputs['stat'] = 'sl'
+        outputs['last_id'] = None
+        return whole_text
+
+
+    def prompt_mode(
+        self,
+        prompt,
+        audio,
+        sr,
+        max_new_tokens=2048,
+    ):
+        wav = torch.tensor(audio)
+        # Satge0: preprocess
+        # set system role, stat will be set to 'sl'
+        stat = 'pre'
+        outputs = self.pipeline.speech_dialogue(None, stat=stat, role=prompt)
         chunk_size = self.audio_processor.get_chunk_size()
 
         # Satge1: start listen

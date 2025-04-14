@@ -6,11 +6,11 @@ import re
 from torch import nn
 from torch.nn.utils.rnn import pad_sequence
 import torch.nn.functional as F
-from loguru import logger
+# from loguru import logger
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
 
-from transformers import AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM
 from transformers import AutoTokenizer
 
 from .adapter import *
@@ -57,7 +57,7 @@ class AudioLLM(torch.nn.Module):
         super().__init__()
 
         self.encoder =  encoder
-        self.llm_decoder = AutoModelForCausalLM.from_pretrained(llm_path, 
+        self.llm_decoder = AutoModelForSeq2SeqLM.from_pretrained(llm_path, 
                                                     torch_dtype="auto",
                                                     trust_remote_code=True)
         self.tokenizer = AutoTokenizer.from_pretrained(llm_path, 
