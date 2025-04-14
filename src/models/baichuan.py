@@ -36,6 +36,49 @@ class BaichuanAudio(BaseModel):
         text += self.role_prefix["assistant"]
         return text
 
+    def chat_mode(
+        self,
+        audio,
+        sr,
+        max_new_tokens=2048,
+    ):
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".wav") as temp_file:
+            temp_filename = temp_file.name
+            # Write the audio data to the file
+            sf.write(temp_file.name, audio, sr, format='wav')
+
+        g_history = []
+
+        g_history.append({
+            "role": "system",
+            "content": "You are a helpful assistant who tries to help answer the user's question."
+        })
+
+        g_history.append({
+            "role": "user",
+            "content": self.audio_start_token + ujson.dumps({'path': temp_filename}, ensure_ascii=False) + self.audio_end_token
+        })
+        message = self.preprocess_messages(g_history)
+        pret = self.model.processor([message])
+        plen = pret.input_ids.shape[1]
+        ret = self.model.generate(
+            pret.input_ids.cuda(),
+            attention_mask=pret.attention_mask.cuda(),
+            audios=pret.audios.cuda() if pret.audios is not None else None,
+            encoder_length=pret.encoder_length.cuda() if pret.encoder_length is not None else None,
+            bridge_length=pret.bridge_length.cuda() if pret.bridge_length is not None else None,
+            tokenizer=self.tokenizer,
+            max_new_tokens=max_new_tokens,
+            stop_strings=['<|endoftext|>'],
+            do_sample=True, temperature=0.8, top_k=20, top_p=0.85, repetition_penalty=1.1, return_dict_in_generate=True,
+        )
+        text_segment = self.tokenizer.decode(ret.sequences[0, plen:])
+        full_text = re.sub(self.special_token_partten, '', text_segment)
+
+        return full_text
+
+
+
     def prompt_mode(
         self,
         prompt,
@@ -52,7 +95,7 @@ class BaichuanAudio(BaseModel):
 
         g_history.append({
             "role": "system",
-            "content": "You are a helpful assistant who tries to help answer the user's question."
+            "content": "You are a helpful assistant. " + prompt
         })
 
         g_history.append({
