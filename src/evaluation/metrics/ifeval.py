@@ -78,6 +78,8 @@ def ifeval_metric(client, data):
             print("Response formant error")
             print(e)
             print(response)
+            print('#' * 20)
+            print(json_str)
             continue
         if_rate += instruction_score
         content_score += relevance

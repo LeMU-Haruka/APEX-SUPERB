@@ -25,12 +25,12 @@ GPT_CONTENT_SCORE_PROMPT = """
         - Relevance: Does the response directly and appropriately address the prompt and the utterance? (1-5, 5 being best)
         - Overall Score: Taking all factors into account, what is the overall quality of the response? (1-5, 5 being best)
         
-    Provide your evaluation in the following JSON format:
+    MUST provide your evaluation ONLY in ***JSON FORMAT***:
     {
         "fluency": <score>,
         "relevance": <score>,
         "overall_score": <score>
-        "details": <reason for each score>
+        "details": <reasons>
     }
 """
 
@@ -77,8 +77,6 @@ def gpt_content_score(client, data):
 
     fluency_score = 0
     relevance_score = 0
-    coherence_score = 0
-    prompt_adherence_score = 0
     overall_score = 0
 
     for item in data:
@@ -89,30 +87,25 @@ def gpt_content_score(client, data):
             json_response = json.loads(json_str)
             fluency = json_response['fluency']
             relevance = json_response['relevance']
-            coherence = json_response['coherence']
-            prompt_adherence = json_response['prompt_adherence']
             overall = json_response['overall_score']
         except BaseException as e:
             print("Response formant error")
             print(e)
             print(response)
+            print('#' * 20)
+            print(json_str)
             continue
         fluency_score += fluency
         relevance_score += relevance
-        coherence_score += coherence
-        prompt_adherence_score += prompt_adherence
+
         overall_score += overall
     fluency_score = fluency_score / len(data)
     relevance_score = relevance_score / len(data)
-    coherence_score = coherence_score / len(data)
-    prompt_adherence_score = prompt_adherence_score / len(data)
     overall_score = overall_score / len(data)
     return {
         'scores': {
             'fluency': fluency_score,
             'relevance': relevance_score,
-            'coherence': coherence_score,
-            'prompt_adherence': prompt_adherence_score,
             'overall': overall_score
         },
     }

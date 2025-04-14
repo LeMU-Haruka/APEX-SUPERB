@@ -60,7 +60,10 @@ def accuracy_metric_with_llm(client, data):
         except BaseException as e:
             print("Response formant error")
             print(e)
-            print(f"Error decoding JSON: {response}")
+            print(response)
+            print('#' * 20)
+            print(json_str)
+            continue
             is_same = 0
         correct += is_same
     return correct / len(data)
