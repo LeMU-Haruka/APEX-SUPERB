@@ -24,8 +24,10 @@ class Qwen25Omni(BaseModel):
         conversation = [
             {"role": "user", "content": content},
         ]
-        inputs = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
-        audios = [audio]
+        text = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
+        audios, images, videos = process_mm_info(conversation, use_audio_in_video=False)
+
+        inputs = self.processor(text=text, audios=audios, images=images, videos=videos, return_tensors="pt", padding=True, use_audio_in_video=False)
         inputs = self.processor(text=inputs, audios=audios, return_tensors="pt", padding=True)
         inputs = inputs.to("cuda")
 
