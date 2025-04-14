@@ -1,8 +1,4 @@
-
-import json
 from openai import OpenAI
-
-from src.evaluation.evaluators.evaluator import Evaluator
 
 class VllmClient:
 

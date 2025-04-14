@@ -1,12 +1,5 @@
-import json
-import os
-import re
-
 import google.generativeai as genai
 from google.generativeai import GenerationConfig
-
-from src.evaluation.evaluators.evaluator import Evaluator
-from utils import extract_json
 
 # 配置代理
 # os.environ['HTTP_PROXY'] = "http://127.0.0.1:7890"
