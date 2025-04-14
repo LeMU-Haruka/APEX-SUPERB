@@ -30,10 +30,9 @@ class Qwen25Omni(BaseModel):
         audios, images, videos = process_mm_info(conversation, use_audio_in_video=False)
 
         inputs = self.processor(text=text, audios=audios, images=images, videos=videos, return_tensors="pt", padding=True, use_audio_in_video=False)
-        inputs = self.processor(text=inputs, audios=audios, return_tensors="pt", padding=True)
-        inputs = inputs.to("cuda")
+        inputs = inputs.to(self.model.device).to(self.model.dtype)
 
-        generate_ids = self.model.generate(**inputs, return_audio=False)
+        generate_ids = self.model.generate(**inputs, max_length=max_new_tokens, return_audio=False)
         generate_ids = generate_ids[:, inputs.input_ids.size(1):]
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
