@@ -37,7 +37,7 @@ class VllmClient:
             model="/userhome/models/llama-2-7b-chat-hf",  # 改为正式模型名 "gpt-4"
             # model='/userhome/models/Llama-3.1-8B-Instruct',
             messages=messages,
-            max_tokens=200,  # 控制生成的最大字数
+            max_tokens=500,  # 控制生成的最大字数
             temperature=0.5,  # 控制创造性，范围是 0 到 1，值越高，生成越随机
             top_p=0.9,  # 通过概率质量选择生成的词汇，top_p 越高选择越多样
             # frequency_penalty=0,  # 控制重复度，越高越少重复

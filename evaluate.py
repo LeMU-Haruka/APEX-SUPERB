@@ -11,7 +11,7 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('--result_path', type=str, required=True)
     parser.add_argument('--model_name', type=str, default='qwen2-audio')
-    parser.add_argument('--evaluator', type=str,  default=None, choices=list(EVALUATOR_MAP.keys())),
+    parser.add_argument('--evaluator', type=str,  default=None),
     parser.add_argument('--output_dir', type=str, default='./evaluate_result')
     parser.add_argument('--api', type=str, default='vllm', choices=['gemini', 'gpt', 'vllm'])
     parser.add_argument('--align', action='store_true', help='Whether to align the output to label using LLM')

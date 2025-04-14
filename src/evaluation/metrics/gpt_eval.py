@@ -1,6 +1,8 @@
 
 import json
 
+from utils import extract_json
+
 
 
 GPT_CONTENT_SCORE_PROMPT = """
@@ -86,14 +88,15 @@ def gpt_content_score(client, data):
     for item in data:
         prompt = build_content_score_prompt(item)
         response = client.generate_response(prompt)
+        json_str = extract_json(response)
         try:
-            json_response = json.loads(response)
+            json_response = json.loads(json_str)
             fluency = json_response['fluency']
             relevance = json_response['relevance']
             coherence = json_response['coherence']
             prompt_adherence = json_response['prompt_adherence']
             overall = json_response['overall_score']
-        except json.JSONDecodeError as e:
+        except BaseException as e:
             print("Response formant error")
             print(e)
             print(response)

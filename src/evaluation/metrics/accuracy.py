@@ -1,6 +1,8 @@
 
 import json
 
+from utils import extract_json
+
 
 ACCURACY_PROMPT = """
     You are an expert evaluator for large language models.
@@ -52,7 +54,14 @@ def accuracy_metric_with_llm(client, data):
     for item in data:
         prompt = build_prompt(item)
         response = client.generate_response(prompt)
-        is_same = json.loads(response)['is_same']
+        json_str = extract_json(response)
+        try:
+            is_same = json.loads(json_str)['is_same']
+        except BaseException as e:
+            print("Response formant error")
+            print(e)
+            print(f"Error decoding JSON: {response}")
+            is_same = 0
         correct += is_same
     return correct / len(data)
 

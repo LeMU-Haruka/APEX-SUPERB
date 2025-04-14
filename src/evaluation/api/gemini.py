@@ -6,6 +6,7 @@ import google.generativeai as genai
 from google.generativeai import GenerationConfig
 
 from src.evaluation.evaluators.evaluator import Evaluator
+from utils import extract_json
 
 # 配置代理
 # os.environ['HTTP_PROXY'] = "http://127.0.0.1:7890"
@@ -34,52 +35,54 @@ class GeminiClient:
         )
         response = self.model.generate_content(message, generation_config=generation_config)
         response = response.text
-        match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response, re.DOTALL | re.IGNORECASE)
+        # match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response, re.DOTALL | re.IGNORECASE)
 
-        if match:
-            json_str = match.group(1).strip() # Extract the captured group (the {...} part)
-        return json_str
+        # if match:
+        #     json_str = match.group(1).strip() # Extract the captured group (the {...} part)
+        return response
 
 
     def generate_response(self, prompt):
         response = self.__call_api(prompt)
         return response
     
-    def extract_json(self, text: str) -> dict | None:
-        """
-        从可能包含 Markdown 代码块或前缀/后缀文本的字符串中提取第一个有效的 JSON 对象。
+    # def extract_json(self, text: str) -> dict | None:
+    #     """
+    #     从可能包含 Markdown 代码块或前缀/后缀文本的字符串中提取第一个有效的 JSON 对象。
 
-        Args:
-            text: 包含潜在 JSON 的原始字符串。
+    #     Args:
+    #         text: 包含潜在 JSON 的原始字符串。
 
-        Returns:
-            解析后的 Python 字典，如果找不到或无法解析则返回 None。
-        """
-        if not text:
-            return None
+    #     Returns:
+    #         解析后的 Python 字典，如果找不到或无法解析则返回 None。
+    #     """
+    #     if not text:
+    #         return None
 
-        # 1. 优先查找 Markdown 代码块 (```json ... ``` or ``` ... ```)
-        #    使用非贪婪匹配 .*? 来获取第一个完整的 {...} 对
-        match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL | re.IGNORECASE)
-        if match:
-            json_str = match.group(1).strip()
-            try:
-                return json.loads(json_str)
-            except json.JSONDecodeError:
-                # 如果 Markdown 块内的内容不是有效 JSON，则继续尝试下面的方法
-                pass
+    #     # 1. 优先查找 Markdown 代码块 (```json ... ``` or ``` ... ```)
+    #     #    使用非贪婪匹配 .*? 来获取第一个完整的 {...} 对
+    #     match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL | re.IGNORECASE)
+    #     if match:
+    #         json_str = match.group(1).strip()
+    #         try:
+    #             return json.loads(json_str)
+    #         except json.JSONDecodeError:
+    #             # 如果 Markdown 块内的内容不是有效 JSON，则继续尝试下面的方法
+    #             pass
 
-        # 2. 如果没找到 Markdown 块，或者块内 JSON 无效，
-        #    则尝试查找第一个 '{' 和最后一个 '}' 之间的内容
-        start_index = text.find('{')
-        end_index = text.rfind('}')
-        if start_index != -1 and end_index != -1 and end_index > start_index:
-            json_str = text[start_index : end_index + 1].strip()
-            try:
-                return json.loads(json_str)
-            except json.JSONDecodeError:
-                # 如果这部分也不是有效 JSON，则失败
-                pass
+    #     # 2. 如果没找到 Markdown 块，或者块内 JSON 无效，
+    #     #    则尝试查找第一个 '{' 和最后一个 '}' 之间的内容
+    #     start_index = text.find('{')
+    #     end_index = text.rfind('}')
+    #     if start_index != -1 and end_index != -1 and end_index > start_index:
+    #         json_str = text[start_index : end_index + 1].strip()
+    #         try:
+    #             return json.loads(json_str)
+    #         except json.JSONDecodeError:
+    #             # 如果这部分也不是有效 JSON，则失败
+    #             pass
 
-        # 3. 如果以上方法都失败
-        return None
+    #     # 3. 如果以上方法都失败
+    #     return None
+
+   

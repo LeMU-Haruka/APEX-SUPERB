@@ -25,17 +25,17 @@ Output only the cleaned text.
 
 
 asr_eval_prompt = """
-You are an expert evaluator for large language models. Your task is to evaluate the quality of the response based on the following criteria:
-Input text: [text]
-Response: [target]
-Evaluation Criteria:
-Word Error Rate (WER): The percentage of words in the response that are incorrect compared to the ground truth.
-Character Error Rate (CER): The percentage of characters in the response that are incorrect compared to the ground truth.
-Provide your evaluation in the following JSON format:
-{
-    "wer": <score>,
-    "cer": <score>
-}
+    You are an expert evaluator for large language models. Your task is to evaluate the quality of the response based on the following criteria:
+    Input text: [text]
+    Response: [target]
+    Evaluation Criteria:
+    Word Error Rate (WER): The percentage of words in the response that are incorrect compared to the ground truth.
+    Character Error Rate (CER): The percentage of characters in the response that are incorrect compared to the ground truth.
+    Provide your evaluation in the following JSON format:
+    {
+        "wer": <score>,
+        "cer": <score>
+    }
 """
 
 def wer_metric(preds, targets):

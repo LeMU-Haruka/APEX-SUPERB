@@ -1,5 +1,7 @@
 import json
 
+from utils import extract_json
+
 
 IFEVAL_PROMPT = """
     You are an evaluator for instruction-following tasks in LLMs.
@@ -33,10 +35,10 @@ IFEVAL_PROMPT = """
 
     Output strictly in the following JSON format:
     {
-    "instruction_following": 0 or 1,
-    "reason_compliance": <reason>,
-    "response_score": 1 to 5,
-    "reason_score": <reason>
+        "instruction_following": 0 or 1,
+        "reason_compliance": <reason>,
+        "response_score": 1 to 5,
+        "reason_score": <reason>
     }
     Here is the inputs:
     Instruction: [INSTRUCTION]
@@ -53,8 +55,8 @@ def build_ifeval_prompt(item):
     Returns:
         str: 提示词
     """
-    instruction = item['instruction']
-    question = item['text']
+    instruction = item['prompt']
+    question = item['question']
     response = item['pred']
     prompt = IFEVAL_PROMPT.replace('[INSTRUCTION]', instruction).replace('[QUESTION]', question).replace('[RESPONSE]', response)
     return prompt
@@ -67,11 +69,12 @@ def ifeval_metric(client, data):
     for item in data:
         prompt = build_ifeval_prompt(item)
         response = client.generate_response(prompt)
+        json_str = extract_json(response)
         try:
-            json_response = json.loads(response)
+            json_response = json.loads(json_str)
             instruction_score = json_response['instruction_compliance']
             relevance = json_response['Response_Score']
-        except json.JSONDecodeError as e:
+        except BaseException as e:
             print("Response formant error")
             print(e)
             print(response)
