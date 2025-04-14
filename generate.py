@@ -8,7 +8,7 @@ from src.models import models_map
 import json
 from tqdm import tqdm
 
-from src.utils import set_seed
+from utils import set_seed
 
 # torch.backends.cuda.enable_mem_efficient_sdp(False)
 # torch.backends.cuda.enable_flash_sdp(False)

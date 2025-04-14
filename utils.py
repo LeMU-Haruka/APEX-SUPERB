@@ -1,3 +1,4 @@
+import os
 import random
 import numpy as np
 import torch
@@ -15,3 +16,14 @@ def set_seed(seed):
 
     print(f"Set random seed to {seed}")
     
+
+
+def load_result_files(path):
+    files = []
+
+    for root, dirs, filenames in os.walk(path):
+        for filename in filenames:
+            if filename.endswith('.json'):
+                files.append(os.path.join(root, filename))
+    print(f"Found {len(files)} files in {path}")
+    return files
