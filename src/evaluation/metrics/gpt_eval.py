@@ -49,7 +49,7 @@ GPT_CONTENT_SCORE_PROMPT = """
     "fluency": [1-5],
     "relevance": [1-5],
     "overall_score": [1-5],
-    "details": "[your reasoning]"
+    "details": "[simple reason for overall score in ONLY ONE sentence]"
     }
 
     Here is an example:
@@ -61,7 +61,7 @@ GPT_CONTENT_SCORE_PROMPT = """
         "fluency": 4,
         "relevance": 1,
         "overall_score": 1,
-        "details": "The model doesn’t answer the question or offer any useful information. Even though the language is fine, it completely fails the task."
+        "details": "Even though the language is fine, it completely fails to answer the question."
     }
 
     Here is the inputs:
@@ -92,9 +92,9 @@ GPT_EMPATHY_SCORE_PROMPT = """
             "clarity": <score>
         },
         "details": {
-            "empathy": <reason>,
-            "content": <reason>,
-            "clarity": <reason>
+            "empathy": <simple reason>,
+            "content": <simple reason>,
+            "clarity": <simple reason>
         }
     }
 """

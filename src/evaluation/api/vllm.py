@@ -1,3 +1,4 @@
+import time
 from openai import OpenAI
 
 class VllmClient:
@@ -43,7 +44,13 @@ class VllmClient:
         return completion.choices[0].message.content
 
     def generate_response(self, prompt):
-        response = self.__call_api(prompt)
+        try:
+            response = self.__call_api(prompt)
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            print("Retrying...")
+            time.sleep(10)
+            response = self.__call_api(prompt)
         return response
     
     # def evaluate(self, data):

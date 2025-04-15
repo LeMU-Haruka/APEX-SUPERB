@@ -1,6 +1,8 @@
+import os
+import random
 import time
-import google.generativeai as genai
-from google.generativeai import GenerationConfig
+from google import genai
+from google.genai import types
 
 # 配置代理
 # os.environ['HTTP_PROXY'] = "http://127.0.0.1:7890"
@@ -8,8 +10,8 @@ from google.generativeai import GenerationConfig
 class GeminiClient:
 
     def __init__(self):
-        genai.configure(api_key='AIzaSyBkXK1UXbn0BUnWEiRhcdryUrWwOgVp3oc')
-        self.model = genai.GenerativeModel('gemini-2.0-flash-lite')
+        os.environ['HTTP_PROXY'] = "http://127.0.0.1:7890"
+        self.client = genai.Client(api_key='AIzaSyBkXK1UXbn0BUnWEiRhcdryUrWwOgVp3oc')
         
 
     def print_support_models(self):
@@ -20,16 +22,20 @@ class GeminiClient:
 
     def __call_api(self, message):
         # delay to avoid to meet rate limit
-        # time.sleep(5)
-        generation_config = GenerationConfig(
-            temperature=0.5,  # 从kwargs中获取，如果没有则使用默认值
-            # top_k=40,
-            top_p=0.9,
-            max_output_tokens=200,
-            # candidate_count=kwargs.get("candidate_count", 1),  # 如果需要，也可以设置
-            # stop_sequences=kwargs.get("stop_sequences", None)   # 如果需要
-        )
-        response = self.model.generate_content(message, generation_config=generation_config)
+        time.sleep(random.uniform(1.5, 3.5))
+        # generation_config = types.GenerateContentConfig(
+        #     temperature=0.5,  # 从kwargs中获取，如果没有则使用默认值
+        #     # top_k=40,
+        #     # top_p=0.9,
+        #     max_output_tokens=500,
+        #     # candidate_count=kwargs.get("candidate_count", 1),  # 如果需要，也可以设置
+        #     # stop_sequences=kwargs.get("stop_sequences", None)   # 如果需要
+        # )
+        response = self.client.models.generate_content(
+            model='gemini-2.5-pro-preview-03-25',
+            contents=[message],
+            # config=generation_config
+            )
         response = response.text
         # match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response, re.DOTALL | re.IGNORECASE)
 
@@ -39,7 +45,13 @@ class GeminiClient:
 
 
     def generate_response(self, prompt):
-        response = self.__call_api(prompt)
+        try:
+            response = self.__call_api(prompt)
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            print("Retrying...")
+            time.sleep(10)
+            response = self.__call_api(prompt)
         return response
     
     # def extract_json(self, text: str) -> dict | None:
