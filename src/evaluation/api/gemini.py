@@ -1,3 +1,4 @@
+import time
 import google.generativeai as genai
 from google.generativeai import GenerationConfig
 
@@ -18,6 +19,8 @@ class GeminiClient:
 
 
     def __call_api(self, message):
+        # delay to avoid to meet rate limit
+        # time.sleep(5)
         generation_config = GenerationConfig(
             temperature=0.5,  # 从kwargs中获取，如果没有则使用默认值
             # top_k=40,

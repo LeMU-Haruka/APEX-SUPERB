@@ -72,7 +72,7 @@ def accuracy_metric_with_llm(client, data):
             continue
         correct += is_same
     cache_str = json.dumps(data, indent=4)
-    return correct / len(data), cache_str
+    return correct / len(data)
 
 def build_prompt(item):
     prompt = ACCURACY_PROMPT
