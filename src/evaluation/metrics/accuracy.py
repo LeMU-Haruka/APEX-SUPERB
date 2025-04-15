@@ -19,13 +19,11 @@ ACCURACY_PROMPT = """
     Ground Truth: [LABEL]
     
     Evaluation Criteria:
-    - Is Same: Does the response convey the same meaning as the ground truth, considering both the Instruction and spoken text? (1 for yes, 0 for no)
-    - Accuracy Score: Assess the factual correctness and consistency of the response with the ground truth, considering both the prompt and spoken instruction. (1-5, 5 being best)
-    
-    YOU MUST output evaluation in ***JSON FORMAT***:
+    - Is Same: Does the response convey the same meaning/result/value as the ground truth? (1 for yes, 0 for no)
+
+    YOU MUST ONLY ***JSON FORMAT*** EVALUATION:
     {{
         "is_same": <0 or 1>,
-        "accuracy_score": <score>
     }}
 """
 
@@ -70,7 +68,6 @@ def accuracy_metric_with_llm(client, data):
             print(json_str)
             item['is_same'] = -1
             failed += 1
-            is_same = 0
             continue
         correct += is_same
     print(f'Total failed item is {failed}')
