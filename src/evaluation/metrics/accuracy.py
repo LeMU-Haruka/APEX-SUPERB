@@ -1,10 +1,10 @@
 
 import json
 
+from tqdm import tqdm
+
 from utils import extract_json
 
-
-CACHE_DIR = 'cache'
 
 ACCURACY_PROMPT = """
     You are an expert evaluator for large language models.
@@ -53,7 +53,7 @@ def accuracy_metric_with_llm(client, data):
     :return: Accuracy as a float
     """
     correct = 0
-    for item in data:
+    for item in tqdm(data, total=len(data), desc="Accuracy with LLM"):
         prompt = build_prompt(item)
         response = client.generate_response(prompt)
         json_str = extract_json(response)
@@ -71,10 +71,8 @@ def accuracy_metric_with_llm(client, data):
             is_same = 0
             continue
         correct += is_same
-    json_str = json.dumps(data, indent=4)  # Convert list of dictionaries to JSON string
-    with open(f'{CACHE_DIR}/accuracy.json', 'w') as f:
-        f.write(json_str)
-    return correct / len(data)
+    cache_str = json.dumps(data, indent=4)
+    return correct / len(data), cache_str
 
 def build_prompt(item):
     prompt = ACCURACY_PROMPT

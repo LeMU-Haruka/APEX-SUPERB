@@ -57,7 +57,7 @@ class AudioLLM(torch.nn.Module):
         super().__init__()
 
         self.encoder =  encoder
-        self.llm_decoder = AutoModelForSeq2SeqLM.from_pretrained(llm_path, 
+        self.llm_decoder = AutoModelForCausalLM.from_pretrained(llm_path, 
                                                     torch_dtype="auto",
                                                     trust_remote_code=True)
         self.tokenizer = AutoTokenizer.from_pretrained(llm_path, 

@@ -1,5 +1,7 @@
 import json
 
+from tqdm import tqdm
+
 from utils import extract_json
 
 CACHE_DIR = 'cache'
@@ -66,15 +68,15 @@ def ifeval_metric(client, data):
     if_rate = 0
     content_score = 0
 
-    for item in data:
+    for item in tqdm(data, total=len(data), desc="IFEVAL"):
         prompt = build_ifeval_prompt(item)
         response = client.generate_response(prompt)
         json_str = extract_json(response)
         item['metric_response'] = response
         try:
             json_response = json.loads(json_str)
-            instruction_score = json_response['instruction_compliance']
-            relevance = json_response['Response_Score']
+            instruction_score = json_response['instruction_following']
+            response_score = json_response['response_score']
         except BaseException as e:
             print("Response formant error")
             print(e)
@@ -85,17 +87,11 @@ def ifeval_metric(client, data):
             item['content_score'] = -1
             continue
         if_rate += instruction_score
-        content_score += relevance
+        content_score += response_score
         item['if_rate'] = instruction_score
-        item['content_score'] = relevance
+        item['content_score'] = response_score
     if_rate = if_rate / len(data)
     content_score = content_score / len(data)
-    fluency_score = fluency_score / len(data)
-
-    # 将结果保存到文件
-    json_str = json.dumps(data, indent=4)  # Convert list of dictionaries to JSON string
-    with open(f'{CACHE_DIR}/ifeval.json', 'w') as f:
-       f.write(json_str)    
     return {
         'scores': {
             'if_rate': if_rate,

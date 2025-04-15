@@ -1,6 +1,8 @@
 
 import json
 
+from tqdm import tqdm
+
 from utils import extract_json
 
 CACHE_DIR = 'cache'
@@ -21,8 +23,9 @@ GPT_CONTENT_SCORE_PROMPT = """
     Response: [PRED]
     
     Evaluation from following ascpects:
+        - Correctness: 
         - Fluency: Is the response grammatically correct and natural-sounding? (1-5, 5 being best)
-        - Relevance: Does the response directly and appropriately address the prompt and the utterance? (1-5, 5 being best)
+        - Relevance: Does the response appropriately address the prompt and the utterance? (1-5, 5 being best)
         - Overall Score: Taking all factors into account, what is the overall quality of the response? (1-5, 5 being best)
         
     MUST provide your evaluation ONLY in ***JSON FORMAT***:
@@ -30,7 +33,7 @@ GPT_CONTENT_SCORE_PROMPT = """
         "fluency": <score>,
         "relevance": <score>,
         "overall_score": <score>
-        "details": <reasons>
+        "details": <reasons for overall score>
     }
 """
 
@@ -112,8 +115,6 @@ def gpt_content_score(client, data):
     overall_score = overall_score / len(data)
     # 将结果保存到文件
     json_str = json.dumps(data, indent=4) 
-    with open(f'./cache/gpt_content_score.json', 'w') as f:
-        f.write(json_str)
     return {
         'scores': {
             'fluency': fluency_score,
@@ -134,7 +135,7 @@ def gpt_empathy_score(client, data):
     empathy_score = 0
     content_score = 0
     clarity_score = 0
-    for item in data:
+    for item in tqdm(data, total=len(data), desc="GPT Empathy Score"):
         prompt = build_empathy_prompt(item)
         response = client.generate_response(prompt)
         try:

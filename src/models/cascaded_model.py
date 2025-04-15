@@ -43,14 +43,24 @@ class CascadedModel(BaseModel):
     
 
     def prompt_fomat(self, prompt, question):
-        prompt_template = """
-        <s>[INST] <<SYS>>
-        You are a helpful assistant.
-        <</SYS>>
+        # prompt_template = """
+        # <s>[INST] <<SYS>>
+        # You are a helpful assistant.
+        # <</SYS>>
 
-        <PROMPT> 
+        # <PROMPT> 
+        # The question is: <QUESTION>
+        #  [/INST]
+        # """
+        prompt_template = """
+        <|begin_of_text|><|start_header_id|>system<|end_header_id|>
+            
+        Cutting Knowledge Date: December 2023
+        Today Date: 26 Jul 2024
+        You are a professional assistant for evaluating large model generations. Please carefully analyze and respond based on the given prompt.<|eot_id|><|start_header_id|>user<|end_header_id|>
+        [PROMPT] 
         The question is: <QUESTION>
-         [/INST]
+        <|eot_id|><|start_header_id|>assistant<|end_header_id|>
         """
         prompt_template = prompt_template.replace('<QUESTION>', question)
         prompt_template = prompt_template.replace('<PROMPT>', prompt)

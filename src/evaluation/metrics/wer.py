@@ -1,4 +1,5 @@
 import jiwer
+from tqdm import tqdm
 
 
 
@@ -42,7 +43,7 @@ def wer_metric(preds, targets):
     # 计算平均wer和cer
     WER = 0.
     CER = 0.
-    for p, t in zip(preds, targets):
+    for p, t in tqdm(zip(preds, targets), total=len(preds), desc="Calculating WER and CER"):
         wer = calculate_wer(p, t)
         cer = calculate_cer(p, t)
         print(f"WER: {wer:.3f}, CER: {cer:.3f}")

@@ -2,6 +2,7 @@
 
 import json
 import os
+import time
 
 from tqdm import tqdm
 from src.evaluation.api import CLIENT_MAP
@@ -49,14 +50,16 @@ class ASREvaluator(Evaluator):
         for item in tqdm(data, total=len(data)):
             if self.is_align:
                 pred = self.align_text(item)
+                item['aligned_text'] = pred
             else:
                 pred = item['pred']
             preds.append(pred)
             targets.append(item['target'])
         scores = self.metric(preds, targets)
-        if len(self.cache_file) > 0:
-            with open(os.path.join(self.cache_dir, f'{self.model_name}_{self.evaluator}_cache.json'), 'w') as f:
-                json.dump(self.cache_file, f, indent=4)
+        json_str = json.dumps(data, indent=4)
+        timestamp = str(int(time.time()))
+        with open(os.path.join(self.cache_dir, f'{self.evaluator}_{timestamp}.json'), 'w') as f:
+            f.write(json_str)
         return {
                 'model': self.model_name,
                 'meta_file': self.meta_file,

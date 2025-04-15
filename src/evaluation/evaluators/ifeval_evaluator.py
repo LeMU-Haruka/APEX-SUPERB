@@ -2,6 +2,7 @@
 
 import json
 import os
+import time
 
 from tqdm import tqdm
 from src.evaluation.api import CLIENT_MAP
@@ -21,6 +22,11 @@ class IfevalEvaluator(Evaluator):
     def evaluate(self, data):
         print(f"Processing evaluation for model '{self.model_name}' on evaluator: '{self.evaluator}'")
         scores = self.metric(self.client, data)
+        # save data to cache
+        json_str = json.dumps(data, indent=4)
+        timestamp = str(int(time.time()))
+        with open(os.path.join(self.cache_dir, f'{self.evaluator}_{timestamp}.json'), 'w') as f:
+            f.write(json_str)
         return {
                 'model': self.model_name,
                 'meta_file': self.meta_file,
