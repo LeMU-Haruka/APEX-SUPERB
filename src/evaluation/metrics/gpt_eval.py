@@ -82,7 +82,7 @@ GPT_EMPATHY_SCORE_PROMPT = """
 
 
     Generated Response: [PRED]
-    Your *entire response* MUST be a single, valid JSON string. NOT A MARKDOWN FORMAT!!!
+    Your *entire response* MUST be a single, valid JSON string.
 
     Use the following JSON string precisely:
     {
@@ -114,7 +114,7 @@ def gpt_content_score(client, data):
     fluency_score = 0
     relevance_score = 0
     overall_score = 0
-
+    failed = 0
     for item in tqdm(data, total=len(data), desc="GPT Content Score"):
         prompt = build_content_score_prompt(item)
         response = client.generate_response(prompt)
@@ -131,6 +131,7 @@ def gpt_content_score(client, data):
             print(response)
             print('#' * 20)
             print(json_str)
+            failed += 1
             item['fluency'] = -1
             item['relevance'] = -1
             item['overall'] = -1
@@ -143,11 +144,11 @@ def gpt_content_score(client, data):
         item['relevance'] = relevance
         item['overall'] = overall
 
-    fluency_score = fluency_score / len(data)
-    relevance_score = relevance_score / len(data)
-    overall_score = overall_score / len(data)
-    # 将结果保存到文件
-    json_str = json.dumps(data, indent=4) 
+
+    print(f'Total failed item is {failed}')
+    fluency_score = fluency_score / (len(data) - failed) 
+    relevance_score = relevance_score / (len(data) - failed)
+    overall_score = overall_score / (len(data) - failed)
     return {
         'scores': {
             'fluency': fluency_score,
@@ -168,11 +169,14 @@ def gpt_empathy_score(client, data):
     empathy_score = 0
     content_score = 0
     clarity_score = 0
+    failed = 0
     for item in tqdm(data, total=len(data), desc="GPT Empathy Score"):
         prompt = build_empathy_prompt(item)
         response = client.generate_response(prompt)
+        json_str = extract_json(response)
+        item['metric_response'] = response
         try:
-            json_response = json.loads(response)
+            json_response = json.loads(json_str)
             empathy = json_response['score']['empathy']
             content = json_response['score']['content']
             clarity = json_response['score']['clarity']
@@ -180,14 +184,16 @@ def gpt_empathy_score(client, data):
             print("Response formant error")
             print(e)
             print(response)
+            failed += 1
             continue
         empathy_score += empathy
         content_score += content
         clarity_score += clarity
 
-    empathy_score = empathy_score / len(data)
-    content_score = content_score / len(data)
-    clarity_score = clarity_score / len(data)
+    print(f'Total failed item is {failed}')
+    empathy_score = empathy_score / (len(data) - failed) 
+    content_score = content_score / (len(data) - failed) 
+    clarity_score = clarity_score / (len(data) - failed) 
     scores = {
         'empathy': empathy_score,
         'content': content_score,

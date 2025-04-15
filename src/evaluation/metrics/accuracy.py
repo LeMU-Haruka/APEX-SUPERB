@@ -22,7 +22,7 @@ ACCURACY_PROMPT = """
     - Is Same: Does the response convey the same meaning as the ground truth, considering both the Instruction and spoken text? (1 for yes, 0 for no)
     - Accuracy Score: Assess the factual correctness and consistency of the response with the ground truth, considering both the prompt and spoken instruction. (1-5, 5 being best)
     
-    Provide your evaluation in the following JSON format:
+    YOU MUST output evaluation in ***JSON FORMAT***:
     {{
         "is_same": <0 or 1>,
         "accuracy_score": <score>
@@ -53,6 +53,7 @@ def accuracy_metric_with_llm(client, data):
     :return: Accuracy as a float
     """
     correct = 0
+    failed = 0
     for item in tqdm(data, total=len(data), desc="Accuracy with LLM"):
         prompt = build_prompt(item)
         response = client.generate_response(prompt)
@@ -68,11 +69,12 @@ def accuracy_metric_with_llm(client, data):
             print('#' * 20)
             print(json_str)
             item['is_same'] = -1
+            failed += 1
             is_same = 0
             continue
         correct += is_same
-    cache_str = json.dumps(data, indent=4)
-    return correct / len(data)
+    print(f'Total failed item is {failed}')
+    return correct / (len(data) - failed)
 
 def build_prompt(item):
     prompt = ACCURACY_PROMPT
