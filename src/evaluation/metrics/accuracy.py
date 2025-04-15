@@ -23,7 +23,7 @@ ACCURACY_PROMPT = """
 
     YOU MUST ONLY ***JSON FORMAT*** EVALUATION:
     {
-        "is_same": <0 or 1>,
+        "is_same": <0 or 1>
     }
 """
 
