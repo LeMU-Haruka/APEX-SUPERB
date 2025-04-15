@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import json
 import os
+import time
 
 from src.evaluation import EVALUATOR_MAP, load_evaluator
 from utils import load_result_files
@@ -33,6 +34,9 @@ def main():
             raise ValueError(f"No files found in {result_file}")
         
     
+    print (f"Evaluation start")
+    start_time = time.time()
+    
     results = []
     for file in evaluated_files:
         with open(file, 'r') as f:
@@ -44,15 +48,15 @@ def main():
             e_type = evaluator_type
         evaluator = load_evaluator(e_type, model_name, file, args.api, is_align=args.align)
         result = evaluator.evaluate(data)
-        print(result)
         results.append(result)
+        print(f"Evaluated {file} end, time cost: {time.time() - start_time:.2f}s")
+        print(result)
 
     # Save the result to a file
     json_result = json.dumps(results, indent=4)
     with open(os.path.join(args.output_dir, f'{model_name}_evaluated.json'), 'w') as f:
         f.write(json_result)
-
-
+    print(f"Evaluation end, total time cost: {time.time() - start_time:.2f}s")
 
 if __name__ == "__main__":
     main()
