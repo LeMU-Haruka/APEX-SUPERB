@@ -82,7 +82,7 @@ def gpt_content_score(client, data):
     relevance_score = 0
     overall_score = 0
 
-    for item in data:
+    for item in tqdm(data, total=len(data), desc="GPT Content Score"):
         prompt = build_content_score_prompt(item)
         response = client.generate_response(prompt)
         json_str = extract_json(response)
