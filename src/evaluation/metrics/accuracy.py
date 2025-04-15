@@ -22,9 +22,9 @@ ACCURACY_PROMPT = """
     - Is Same: Does the response convey the same meaning/result/value as the ground truth? (1 for yes, 0 for no)
 
     YOU MUST ONLY ***JSON FORMAT*** EVALUATION:
-    {{
+    {
         "is_same": <0 or 1>,
-    }}
+    }
 """
 
 
