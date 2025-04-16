@@ -52,10 +52,10 @@ def main():
         print(f"Evaluated {file} end, time cost: {time.time() - start_time:.2f}s")
         print(result)
 
-    # Save the result to a file
-    json_result = json.dumps(results, indent=4)
-    with open(os.path.join(args.output_dir, f'{model_name}_evaluated.json'), 'w') as f:
-        f.write(json_result)
+        # Save the result to a file after each task, avoid losing all results if the process is interrupted
+        json_result = json.dumps(results, indent=4)
+        with open(os.path.join(args.output_dir, f'{model_name}_evaluated.json'), 'w') as f:
+            f.write(json_result)
     print(f"Evaluation end, total time cost: {time.time() - start_time:.2f}s")
 
 if __name__ == "__main__":

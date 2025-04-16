@@ -31,7 +31,11 @@ CLASSIFICATION_TASKS = [
     'speaker_role',
     'mmau',
     'mmlu',
-    'gsm8k'
+    'gsm8k',
+    'gsm8k_fewshot_1',
+    'gsm8k_fewshot_2',
+    'gsm8k_fewshot_4',
+    'gsm8k_fewshot_8',
 ]
 
 GPT_SCORE_TASKS = [

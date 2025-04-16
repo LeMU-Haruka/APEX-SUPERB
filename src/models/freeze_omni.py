@@ -87,7 +87,7 @@ class FreezeOmni(BaseModel):
         # Satge0: preprocess
         # set system role, stat will be set to 'sl'
         stat = 'pre'
-        outputs = self.pipeline.speech_dialogue(None, stat=stat, role="You are a helpful assistant.")
+        outputs = self.pipeline.speech_dialogue(None, stat=stat, role="You are a helpful speech assistant.")
         chunk_size = self.audio_processor.get_chunk_size()
 
         # Satge1: start listen
@@ -145,7 +145,7 @@ class FreezeOmni(BaseModel):
         # Satge0: preprocess
         # set system role, stat will be set to 'sl'
         stat = 'pre'
-        outputs = self.pipeline.speech_dialogue(None, stat=stat, role=prompt)
+        outputs = self.pipeline.speech_dialogue(None, stat=stat, role="You are a helpful assistant. " + prompt)
         chunk_size = self.audio_processor.get_chunk_size()
 
         # Satge1: start listen
