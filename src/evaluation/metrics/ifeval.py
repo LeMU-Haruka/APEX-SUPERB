@@ -11,13 +11,19 @@ IFEVAL_PROMPT = """
 
     Instruction Following:
 
-    Output 1 if the response fully follows the instruction, otherwise output 0.
-
-    Instructions may involve various constraints (e.g., number of words, bullet points, JSON format, special casing, etc.).
+    Measure how well the response follows the instruction. The instruction may include specific requirements such as:
+    - Number of words
+    - JSON format
+    - Uppercase or lowercase
+    - Chain-of-thought (CoT) reasoning
+    
+    Output 1 if the response fully follows the requirement (e.g., number of words, bullet points, JSON format, special casing, etc.). of instruction, otherwise output 0.
 
     If the instruction requires a chain-of-thought (CoT) reasoning (e.g., "think step-by-step"), treat the presence of a clear multi-step reasoning process as mandatory for compliance.
 
     If CoT is missing when required, mark instruction_following = 0.
+
+    For the instruction following score should not care about the correctness of the response. ONLY care about whether the response follows the instruction.
 
     Response Score:
 
