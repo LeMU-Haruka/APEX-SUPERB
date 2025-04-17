@@ -2,14 +2,16 @@ import torch
 from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq, pipeline, AutoModelForCausalLM, AutoTokenizer
 
 from src.models.base_model import BaseModel
+from src.models.src_salmonn.models.modeling_whisper import WhisperForConditionalGeneration
 
 
 class CascadedModel(BaseModel):
     def __init__(self, llm_path='Qwen/Qwen2-Audio-7B-Instruct', whisper_path='/userhome/models/whisper-large-v3'):
-        self.asr_device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.llm_device = "cuda:1" if torch.cuda.is_available() else "cpu"
-        self.torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
-        self.asr_pipe = self.init_asr_model(whisper_path)
+        self.asr_device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.llm_device = torch.device("cuda:1")
+        print(f"ASR device: {self.asr_device}, LLM device: {self.llm_device}")
+        self.torch_dtype = torch.float16 if self.asr_device.type == "cuda" else torch.float32
+        self.asr_pipe = self.init_asr_pipeline(whisper_path)
 
         # init text LLM
         self.tokenizer = AutoTokenizer.from_pretrained(llm_path)
@@ -20,26 +22,39 @@ class CascadedModel(BaseModel):
         self.model.eval()
 
 
-    def init_asr_model(self, whisper_path):  
-        processor = AutoProcessor.from_pretrained(whisper_path)
-        model = AutoModelForSpeechSeq2Seq.from_pretrained(whisper_path, torch_dtype=self.torch_dtype, low_cpu_mem_usage=True)
+    def init_asr_pipeline(self, whisper_path):
+        model = AutoModelForSpeechSeq2Seq.from_pretrained(
+            whisper_path, torch_dtype=self.torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
+        )
         model.to(self.asr_device)
+
+        processor = AutoProcessor.from_pretrained(whisper_path)
+
         pipe = pipeline(
             "automatic-speech-recognition",
             model=model,
             tokenizer=processor.tokenizer,
             feature_extractor=processor.feature_extractor,
-            chunk_length_s=30,
             torch_dtype=self.torch_dtype,
             device=self.asr_device,
+            chunk_length_s=30,
+            stride_length_s=6,  
+            return_timestamps=False,
         )
         return pipe
 
     def asr(self, audio, sr):
         assert sr == 16000
-        result = self.asr_pipe(audio, generate_kwargs={"language": "english", "task": "transcribe"})
-        text = result['text']
-        return text
+        result = self.asr_pipe(audio)
+        transcription = result["text"]
+        return transcription
+        # inputs = self.processor(audio, return_tensors="pt")
+        # input_features = inputs.input_features.to(
+        #     self.asr_device, dtype=self.torch_dtype  # ② 再统一到模型的设备 & dtype
+        # )
+        # generated_ids  = self.asr_model.generate(inputs=input_features)
+        # transcription = self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        # return transcription
     
 
     def prompt_fomat(self, prompt, question):
@@ -52,40 +67,41 @@ class CascadedModel(BaseModel):
         # The question is: <QUESTION>
         #  [/INST]
         # """
-        prompt_template = """
-        <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-            
-        Cutting Knowledge Date: December 2023
-        Today Date: 26 Jul 2024
-        You are a professional assistant for evaluating large model generations. Please carefully analyze and respond based on the given prompt.<|eot_id|><|start_header_id|>user<|end_header_id|>
-        [PROMPT] 
-        The question is: <QUESTION>
-        <|eot_id|><|start_header_id|>assistant<|end_header_id|>
-        """
-        prompt_template = prompt_template.replace('<QUESTION>', question)
-        prompt_template = prompt_template.replace('<PROMPT>', prompt)
-        return prompt_template 
+        messages = [
+            {"role": "system",
+            "content": "You are a concise, knowledgeable assistant."},
+            {"role": "user",
+            "content": "### Task Instruction\n" + prompt + "\n\n### Question\n" + question},
+        ]
+        prompt_ids = self.tokenizer.apply_chat_template(
+            messages, add_generation_prompt=True, return_tensors="pt"
+        ).to(self.model.device)
+        return prompt_ids 
 
     def generate(self, prompt):
         # input_ids = self.tokenizer(prompt, return_tensors="pt").to(self.device)
         # outputs = self.model.generate(**input_ids, max_new_tokens=200, cache_implementation="static")
         # response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
         # return response
-        model_input = self.tokenizer(prompt, return_tensors='pt', padding=True).to(self.llm_device)
-        with torch.no_grad():
-            outputs = self.model.generate(**model_input, max_new_tokens=300, temperature=0.1, top_p=0.75)
-            decoded_outputs = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
-            # print(decoded_outputs)
-        return decoded_outputs[0]
-        
+        out_ids = self.model.generate(
+            prompt,
+            max_new_tokens=300,
+            eos_token_id=self.tokenizer.eos_token_id,   # <|eot_id|>
+        )
+        response = self.tokenizer.decode(out_ids[0][prompt.shape[-1]:], skip_special_tokens=True)
+        # print(response.strip())
+        return response
+                
             
     def chat_mode(
         self,
         audio,
         max_new_tokens=2048,
     ):
-        print ('cascaded model do not have chat mode')
-        pass
+        asr_text = self.asr(audio)
+        prompt = self.prompt_fomat('', asr_text)
+        response = self.generate(prompt)
+        return response
 
     def prompt_mode(
             self,

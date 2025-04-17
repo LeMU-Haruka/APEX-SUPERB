@@ -1,4 +1,4 @@
-from transformers import Qwen2_5OmniModel, Qwen2_5OmniProcessor
+from transformers import Qwen2_5OmniForConditionalGeneration, Qwen2_5OmniProcessor
 from qwen_omni_utils import process_mm_info
 from src.models.base_model import BaseModel
 
@@ -6,7 +6,7 @@ from src.models.base_model import BaseModel
 class Qwen25Omni(BaseModel):
     def __init__(self, llm_path='Qwen/Qwen2-Audio-7B-Instruct'):
         self.processor = Qwen2_5OmniProcessor.from_pretrained(llm_path)
-        self.model = Qwen2_5OmniModel.from_pretrained(llm_path, 
+        self.model = Qwen2_5OmniForConditionalGeneration.from_pretrained(llm_path, 
                                                       torch_dtype="auto", 
                                                       device_map="auto", 
                                                       attn_implementation="eager",
