@@ -7,7 +7,7 @@ import time
 from tqdm import tqdm
 from src.evaluation.api import CLIENT_MAP
 from src.evaluation.evaluators.evaluator import Evaluator
-from src.evaluation.metrics.ifeval import ifeval_metric
+from src.evaluation.metrics.ifeval import ifeval_metric_v1
 
 class IfevalEvaluator(Evaluator):
     def __init__(self, model_name, meta_file, evaluator, api, is_align=True, cache_dir='./cache'):
@@ -16,7 +16,7 @@ class IfevalEvaluator(Evaluator):
         self.evaluator = evaluator
         self.meta_file = meta_file
         self.client = CLIENT_MAP[api]()
-        self.metric = ifeval_metric
+        self.metric = ifeval_metric_v1
 
 
     def evaluate(self, data):

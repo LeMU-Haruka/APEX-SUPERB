@@ -1,7 +1,8 @@
 import json
 
 from tqdm import tqdm
-
+import nltk
+from src.evaluation.metrics.gpt_eval import build_content_score_prompt
 from utils import extract_json
 
 CACHE_DIR = 'cache'
@@ -54,6 +55,28 @@ IFEVAL_PROMPT = """
     Response: [RESPONSE]
 """
 
+CHECK_COT_PROMPT = """
+    You are an evaluation expert. Your task is to decide whether the response of LLM explicitly contains a Chain‑of‑Thought (CoT) reasoning process.
+
+    # CRITERIA
+    A text **contains** CoT if it shows any of these signs:
+    1. Explicit step‑by‑step reasoning (e.g. “Step 1 … Step 2 …”).
+    2. A phrase like “Let’s think step by step” followed by multi‑line reasoning.
+    3. Intermediate assumptions, calculations, or conclusions before the final answer.
+    4. Visible reasoning traces such as listed assumptions, conditions, or formulas.
+
+    If the text only gives a direct answer or mere facts with no reasoning steps, it **does not contain** CoT.
+
+    # OUTPUT FORMAT
+    Respond with **exactly one** JSON object—nothing else:
+
+    - If CoT is present: `{"contain": 1}`
+    - If CoT is absent:  `{"contain": 0}`
+
+    # INPUT RESPONSE
+    [REPONSE]
+"""
+
 
 def build_ifeval_prompt(item):
     """
@@ -69,6 +92,60 @@ def build_ifeval_prompt(item):
     prompt = IFEVAL_PROMPT.replace('[INSTRUCTION]', instruction).replace('[QUESTION]', question).replace('[RESPONSE]', response)
     return prompt
 
+
+def check_capitalization(text):
+    """
+    检查文本是否全部为大写字母
+    Args:
+        text: 文本
+    Returns:
+        bool: 是否包含大写字母
+    """
+    if text.isupper():
+       return 1
+    return 0
+
+def check_length(text):
+  """Counts the number of words."""
+  tokenizer = nltk.tokenize.RegexpTokenizer(r"\w+")
+  tokens = tokenizer.tokenize(text)
+  num_words = len(tokens)
+  if num_words > 100:
+     return 0
+  return 1
+
+
+def check_json(text):
+    post_test = extract_json(text)
+    try:
+      json.loads(post_test)
+    except BaseException as _:
+      return 0
+    return 1
+
+
+def get_content_score(client, item):
+    prompt = build_content_score_prompt(item)
+    response = client.generate_response(prompt)
+    json_str = extract_json(response)
+    try:
+        json_response = json.loads(json_str)
+        score = json_response['overall_score']
+    except BaseException as e:
+        print("Response formant error")
+        print(e)
+        print(response)
+        print('#' * 20)
+        print(json_str)
+        score = -1
+    return score
+
+def check_cot(client, text):
+    prompt = CHECK_COT_PROMPT
+    prompt = prompt.replace('[REPONSE]', text)
+    response = client.generate_response(prompt)
+    json_str = extract_json(response)
+    return json_str
 
 def ifeval_metric(client, data):
     if_rate = 0
@@ -105,4 +182,57 @@ def ifeval_metric(client, data):
         },
     }
 
+def check_choice(text, choice=['student', 'teacher', 'doctor', 'police', 'engineer']):
+    for c in choice:
+        if c in text:
+            return 1
+    return 0
 
+def ifeval_metric_v1(client, data):
+    total_if_rate = 0
+    total_content_score = 0
+    if_rate_failed = 0
+    content_failed = 0
+    for item in tqdm(data, total=len(data), desc="IFEVAL"):
+        category = item['kargs']['category']
+        pred = item['pred']
+        if category == 'All capital':
+            if_rate = check_capitalization(pred)
+        if category == 'JSON format':
+            if_rate = check_json(pred)
+        if category == 'Length Constraint':
+            if_rate = check_length(pred)
+        if category == 'Choice':
+            if_rate = check_choice(pred)
+        if category == 'CoT':
+            response = check_cot(client, pred)
+            try:
+                result = json.loads(response)
+                if_rate = result['contain']
+            except BaseException as e:
+                print("Response formant error")
+                print(e)
+                print(response)
+                result = 0
+                if_rate_failed += 1
+                item['if_rate'] = -1
+        contain_score = get_content_score(client, item)
+        if contain_score == -1:
+            item['content_score'] = -1
+            content_failed += 1
+            contain_score = 0
+        else:
+            item['content_score'] = contain_score
+        item['if_rate'] = if_rate
+        total_content_score += contain_score
+        total_if_rate += if_rate
+    
+    avg_score = total_content_score / (len(data) - content_failed)
+    avg_if_rate = total_if_rate / (len(data) - if_rate_failed)
+    return {
+        'scores': {
+            'if_rate': avg_if_rate,
+            'content_score': avg_score,
+        },
+    }
+    
