@@ -18,9 +18,8 @@ from torch.distributed.fsdp import (
     FullyShardedDataParallel as FSDP,
 )
 
-from src_audio_flamingo.helpers import TransformerEncoder
-from src_audio_flamingo.utils import apply_with_stopping_condition
-
+from src.models.src_audio_flamingo.helpers import TransformerEncoder
+from src.models.src_audio_flamingo.utils import apply_with_stopping_condition
 # try:
 #     from .helpers import TransformerEncoder
 #     from .utils import apply_with_stopping_condition

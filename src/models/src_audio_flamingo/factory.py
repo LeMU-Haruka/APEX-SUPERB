@@ -21,10 +21,10 @@ from transformers import (
     AutoTokenizer,
 )
 
-from src_audio_flamingo.flamingo import Flamingo
-from src_audio_flamingo.flamingo_lm import FlamingoLMMixin
-from src_audio_flamingo.my_laion_clap.CLAP.src.laion_clap.clap_module.htsat import create_htsat_model
-from src_audio_flamingo.utils import extend_instance
+from src.models.src_audio_flamingo.flamingo import Flamingo
+from src.models.src_audio_flamingo.flamingo_lm import FlamingoLMMixin
+from src.models.src_audio_flamingo.my_laion_clap.CLAP.src.laion_clap.clap_module.htsat import create_htsat_model
+from src.models.src_audio_flamingo.utils import extend_instance
 
 
 # Attempt to import local modules with fallback

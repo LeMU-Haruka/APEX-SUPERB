@@ -58,16 +58,16 @@ EVALUATOR_MAP = {
 
 # 根据上面的EVALUATOR_MAP和后面的注释，按照注释内容映射到指定的evaluator
 
-def load_evaluator(evaluator_type, model_name, result_file, api, is_align=False):
-    if evaluator_type in ASR_TASKS:
-        evaluator_type = 'asr'
-    elif evaluator_type in ST_TASKS:
-        evaluator_type = 'st'
-    elif evaluator_type in CLASSIFICATION_TASKS:
-        evaluator_type = 'accuracy'
-    elif evaluator_type in GPT_SCORE_TASKS:
-        evaluator_type = 'score'
-    elif evaluator_type in IF_EVAL_TASKS:
-        evaluator_type = 'ifeval'
-    evaluator = EVALUATOR_MAP[evaluator_type](model_name, result_file, evaluator_type, api, is_align)
+def load_evaluator(task, model_name, result_file, api, is_align=False):
+    if task in ASR_TASKS:
+        evaluator = 'asr'
+    elif task in ST_TASKS:
+        evaluator = 'st'
+    elif task in CLASSIFICATION_TASKS:
+        evaluator = 'accuracy'
+    elif task in GPT_SCORE_TASKS:
+        evaluator = 'score'
+    elif task in IF_EVAL_TASKS:
+        evaluator = 'ifeval'
+    evaluator = EVALUATOR_MAP[evaluator](model_name, result_file, task, api, is_align)
     return evaluator

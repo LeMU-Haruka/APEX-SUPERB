@@ -1,8 +1,9 @@
+import io
 import os
 import random
 import numpy as np
 import torch
-
+import soundfile as sf
 
 def set_seed(seed):
     random.seed(seed)
@@ -32,3 +33,11 @@ def load_result_files(intput_dir):
                     result_files.append(os.path.join(root, file))
     return result_files
 
+
+
+
+def array_to_audio_bytes(audio_array, sr, fmt="wav") -> bytes:
+    buf = io.BytesIO()
+    sf.write(buf, audio_array, sr, format=fmt.upper())  # fmt 可为 'WAV', 'FLAC' 等
+    buf.seek(0)
+    return buf.read()

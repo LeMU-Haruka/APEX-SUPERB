@@ -1,47 +1,45 @@
-# TODO
-from .base import VoiceAssistant
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
-import transformers
-import torch
-import io
 import base64
+from src.models.base_model import BaseModel
+from src.utils import array_to_audio_bytes
 from openai import OpenAI
-import soundfile as sf
 
 
-class GPT4oAssistant(VoiceAssistant):
-    def __init__(self):
-        self.client = OpenAI()
-        self.model_name = "gpt-4o-audio-preview"
-
-    def generate_audio(
-        self,
-        audio,
-        max_new_tokens=2048,
-    ):
-        # Write the audio data to an in-memory buffer in WAV format
-        buffer = io.BytesIO()
-        sf.write(buffer, audio['array'], audio['sampling_rate'], format='WAV')
-        buffer.seek(0)  # Reset buffer position to the beginning
-
-        # Read buffer as bytes and encode in base64
-        wav_data = buffer.read()
-        encoded_string = base64.b64encode(wav_data).decode('utf-8')
-
-        completion = self.client.chat.completions.create(
-            model=self.model_name,
-            modalities=["text"],
-            max_tokens=max_new_tokens,
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant who tries to help answer the user's question."},
-                {"role": "user", "content": [{"type": "input_audio", "input_audio": {"data": encoded_string, "format": 'wav'}}]},
-            ]
+class GPT4oAudio(BaseModel):
+    def __init__(self, llm_path='gpt-4o-mini-audio-preview'):
+        openai_api_key = "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"
+        self.client = OpenAI(
+            api_key=openai_api_key,
         )
 
-        return completion.choices[0].message.content
+    def prompt_mode(
+        self,
+        prompt,
+        audio,
+        sr,
+        max_new_tokens=2048,
+    ):
+        audio_bytes = array_to_audio_bytes(audio, sr)
+        encoded_string = base64.b64encode(audio_bytes).decode('utf-8')
 
+        response = self.client.chat.completions.create(
+            model="gpt-4o-mini-audio-preview",
+            modalities=["text"],
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": [
+                    {"type": "text", "text": prompt},
+                                    {
+                    "type": "input_audio",
+                    "input_audio": {
+                        "data": encoded_string,
+                        "format": "wav"
+                    }
+                }
+                ]}
+            ],
+            max_tokens=500,
+            temperature=0.7,
+        )
+        response_text = response.choices[0].message.content
+        return response_text
 
-class GPT4oMiniAssistant(VoiceAssistant):
-    def __init__(self):
-        self.client = OpenAI()
-        self.model_name = "gpt-4o-mini-audio-preview"

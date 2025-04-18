@@ -12,26 +12,23 @@ from src.evaluation.metrics.accuracy import accuracy_metric
 
 
 class GPTScoreEvaluator(Evaluator):
-    def __init__(self, model_name, meta_file, evaluator, api, is_align=True, cache_dir='./cache'):
+    def __init__(self, model_name, meta_file, task, api, is_align=True, cache_dir='./cache'):
         self.model_name = model_name
         self.cache_dir = cache_dir
-        self.evaluator = evaluator
+        self.task = task
         self.meta_file = meta_file
         self.client = CLIENT_MAP[api]()
-        self.metric = gpt_empathy_score if evaluator == 'empathy_score' else gpt_content_score
+        self.metric = gpt_empathy_score if task == 'empathy_score' else gpt_content_score
 
     def evaluate(self, data):
-        print(f"Processing evaluation for model '{self.model_name}' on evaluator: '{self.evaluator}'")
+        print(f"Processing evaluation for model '{self.model_name}' on evaluator: '{self.task}'")
         scores = self.metric(self.client, data)
         # save data to cache
 
-        json_str = json.dumps(data, indent=4)
-        timestamp = str(int(time.time()))
-        with open(os.path.join(self.cache_dir, f'{self.evaluator}_{timestamp}.json'), 'w') as f:
-            f.write(json_str)
+        self.save_cache(data)
         return {
                 'model': self.model_name,
                 'meta_file': self.meta_file,
-                'task': self.evaluator,
+                'task': self.task,
                 'score': scores,
             }

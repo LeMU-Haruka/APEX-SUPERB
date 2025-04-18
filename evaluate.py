@@ -3,9 +3,8 @@ import json
 import os
 import time
 
-from src.evaluation import EVALUATOR_MAP, load_evaluator
+from src.evaluation import load_evaluator
 from utils import load_result_files
-
 
 
 def main():
@@ -23,6 +22,7 @@ def main():
 
     result_file = args.result_path
     model_name = args.model_name
+
 
     if os.path.isfile(result_file):
         evaluated_files = [result_file]
@@ -43,10 +43,10 @@ def main():
             data = json.load(f)
         # evaluator = EVALUATOR_MAP[args.task]()
         if evaluator_type is None:
-            e_type = file.split('-')[-1].split('.')[0]
+            task = file.split('-')[-1].split('.')[0]
         else:
-            e_type = evaluator_type
-        evaluator = load_evaluator(e_type, model_name, file, args.api, is_align=args.align)
+            task = evaluator_type
+        evaluator = load_evaluator(task, model_name, file, args.api, is_align=args.align)
         result = evaluator.evaluate(data)
         results.append(result)
         print(f"Evaluated {file} end, time cost: {time.time() - start_time:.2f}s")

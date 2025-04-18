@@ -1,3 +1,4 @@
+import re
 import jiwer
 from tqdm import tqdm
 
@@ -46,7 +47,6 @@ def wer_metric(preds, targets):
     for p, t in tqdm(zip(preds, targets), total=len(preds), desc="Calculating WER and CER"):
         wer = calculate_wer(p, t)
         cer = calculate_cer(p, t)
-        print(f"WER: {wer:.3f}, CER: {cer:.3f}")
         WER += wer
         CER += cer
     WER /= len(preds)
@@ -57,7 +57,13 @@ def wer_metric(preds, targets):
         'wer': WER,
         'cer': CER
     }
-    
+
+def normalize_text(text):
+    """小写 + 去标点 + 多空格合并"""
+    text = text.lower()
+    text = re.sub(r'[^\w\s]', '', text)  # 去除标点符号
+    text = re.sub(r'\s+', ' ', text).strip()  # 合并多余空格
+    return text
 
 def calculate_wer(predicted_sentence, ground_truth):
     """
@@ -70,7 +76,15 @@ def calculate_wer(predicted_sentence, ground_truth):
     Returns:
         float:  WER 值 (0.0 表示完全正确, 1.0 表示完全错误).
     """
-    wer = jiwer.wer(ground_truth, predicted_sentence)
+
+    transform = jiwer.Compose([
+        jiwer.RemovePunctuation(),
+        jiwer.RemoveMultipleSpaces(),
+        jiwer.ToLowerCase()
+    ])
+    gt = transform(ground_truth)
+    pred = transform(predicted_sentence)
+    wer = jiwer.wer(gt, pred)
     return wer
 
 
@@ -85,5 +99,12 @@ def calculate_cer(predicted_sentence, ground_truth):
     Returns:
         float:  CER 值 (0.0 表示完全正确, 1.0 表示完全错误).
     """
-    cer = jiwer.cer(ground_truth, predicted_sentence)
+    transform = jiwer.Compose([
+        jiwer.RemovePunctuation(),
+        jiwer.RemoveMultipleSpaces(),
+        jiwer.ToLowerCase()
+    ])
+    gt = transform(ground_truth)
+    pred = transform(predicted_sentence)
+    cer = jiwer.cer(gt, pred)
     return cer

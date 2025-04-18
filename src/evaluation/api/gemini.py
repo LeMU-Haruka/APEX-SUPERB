@@ -15,9 +15,8 @@ class GeminiClient:
         
 
     def print_support_models(self):
-        for m in genai.list_models():
-            if "generateContent" in m.supported_generation_methods:
-                print(m.name)
+        for m in self.client.models.list():
+                print(m)
 
 
     def __call_api(self, message):

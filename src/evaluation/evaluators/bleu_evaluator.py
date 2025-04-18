@@ -57,10 +57,10 @@ BLUE_ALIGNMENT_PROMPT = """
         """
 
 class BleuEvaluator(Evaluator):
-    def __init__(self, model_name, meta_file, evaluator, api, is_align=True, cache_dir='./cache'):
+    def __init__(self, model_name, meta_file, task, api, is_align=True, cache_dir='./cache'):
         self.model_name = model_name
         self.cache_dir = cache_dir
-        self.evaluator = evaluator
+        self.task = task
         self.meta_file = meta_file
         self.client = CLIENT_MAP[api]()
         self.is_align = is_align
@@ -70,7 +70,7 @@ class BleuEvaluator(Evaluator):
 
 
     def evaluate(self, data):
-        print(f"Processing evaluation for model '{self.model_name}' on evaluator: '{self.evaluator}'")
+        print(f"Processing evaluation for model '{self.model_name}' on evaluator: '{self.task}'")
         preds = []
         targets = []
         for item in tqdm(data, total=len(data)):
@@ -82,13 +82,10 @@ class BleuEvaluator(Evaluator):
             preds.append(pred)
             targets.append(item['target'])
         scores = self.metric(preds, targets)
-        json_str = json.dumps(data, indent=4)
-        timestamp = str(int(time.time()))
-        with open(os.path.join(self.cache_dir, f'{self.evaluator}_{timestamp}.json'), 'w') as f:
-            f.write(json_str)
+        self.save_cache(data)
         return {
                 'model': self.model_name,
                 'meta_file': self.meta_file,
-                'task': self.evaluator,
+                'task': self.task,
                 'score': scores,
             }

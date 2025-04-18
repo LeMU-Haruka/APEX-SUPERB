@@ -109,8 +109,6 @@ def gpt_content_score(client, data):
     Returns:
         float: GPT 计算的分数
     """
-    prompt = GPT_CONTENT_SCORE_PROMPT
-
     fluency_score = 0
     relevance_score = 0
     overall_score = 0

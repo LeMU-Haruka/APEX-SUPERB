@@ -14,9 +14,9 @@ from pydub import AudioSegment
 from safetensors.torch import load_file
 from huggingface_hub import snapshot_download
 
-from base_model import BaseModel
-from src_audio_flamingo.factory import create_model_and_transforms
-from utils import Dict2Class, get_autocast, get_cast_dtype
+from src.models.base_model import BaseModel
+from src.models.src_audio_flamingo.factory import create_model_and_transforms
+from src.models.utils import Dict2Class, get_autocast, get_cast_dtype
 
 def int16_to_float32(x):
     return (x / 32767.0).astype(np.float32)
@@ -32,7 +32,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 class AudioFlamingo2(BaseModel):
     
     def __init__(self, llm_path='/userhome/models/audio-flamingo-2'):
-        config = yaml.load(open("configs/inference.yaml"), Loader=yaml.FullLoader)
+        config = yaml.load(open("src/models/src_audio_flamingo/configs/inference.yaml"), Loader=yaml.FullLoader)
 
         self.data_config = config['data_config']
         self.model_config = config['model_config']
@@ -42,9 +42,9 @@ class AudioFlamingo2(BaseModel):
         self.model, self.tokenizer = create_model_and_transforms(
             **self.model_config,
             clap_config=self.clap_config, 
-            use_local_files=args.offline,
-            gradient_checkpointing=args.gradient_checkpointing,
-            freeze_lm_embeddings=args.freeze_lm_embeddings,
+            use_local_files=self.args.offline,
+            gradient_checkpointing=self.args.gradient_checkpointing,
+            freeze_lm_embeddings=self.args.freeze_lm_embeddings,
         )
 
         self.device_id = 0
@@ -52,7 +52,7 @@ class AudioFlamingo2(BaseModel):
         self.model.eval()
 
         # Load metadata
-        with open(os.path.join(llm_path, "safe_ckpt/metadata.json", "r")) as f:
+        with open(os.path.join(llm_path, "safe_ckpt/metadata.json"), "r") as f:
             metadata = json.load(f)
 
         # Reconstruct the full state_dict
@@ -69,10 +69,10 @@ class AudioFlamingo2(BaseModel):
         missing_keys, unexpected_keys = self.model.load_state_dict(state_dict, False)
 
         self.autocast = get_autocast(
-            args.precision, cache_enabled=(not args.fsdp)
+            self.args.precision, cache_enabled=(not self.args.fsdp)
         )
 
-        self.cast_dtype = get_cast_dtype(args.precision)
+        self.cast_dtype = get_cast_dtype(self.args.precision)
 
         self.inference_kwargs = {
             "do_sample": True,
@@ -84,7 +84,7 @@ class AudioFlamingo2(BaseModel):
         # for item in data:
         #     self.predict(item['path'], item['prompt'])
 
-    def get_num_windows(T, sr, clap_config):
+    def get_num_windows(self, T, sr, clap_config):
 
         window_length  = int(float(clap_config["window_length"]) * sr)
         window_overlap = int(float(clap_config["window_overlap"]) * sr)
@@ -104,7 +104,7 @@ class AudioFlamingo2(BaseModel):
         return num_windows, full_length
 
 
-    def read_audio(self, file_path, target_sr, duration, start):
+    def read_audio(self, file_path, target_sr, duration, start, clap_config):
 
         if file_path.endswith('.mp3'):
             audio = AudioSegment.from_file(file_path)
@@ -230,78 +230,80 @@ class AudioFlamingo2(BaseModel):
         
         output_decoded = self.tokenizer.decode(output).split(self.tokenizer.sep_token)[-1].replace(self.tokenizer.eos_token, '').replace(self.tokenizer.pad_token, '').replace('<|endofchunk|>', '')
 
+        if len(output_decoded) == 0:
+            output_decoded = ""
         print('Prompt: ', prompt)
         print('Audio Flamingo 2: ', output_decoded)
-
+        
         return output_decoded
     
     def chat_mode(self, audio, sr, max_new_tokens=2048):
         return self.prompt_mode('You are a helpful speech assistant', audio, sr, max_new_tokens)
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--input", "-i", type=str, help="Path to input JSON file")
-    # parsed_args = parser.parse_args()
+#     # parser = argparse.ArgumentParser()
+#     # parser.add_argument("--input", "-i", type=str, help="Path to input JSON file")
+#     # parsed_args = parser.parse_args()
 
-    local_dir = "../../audio-flamingo-2"
-    if not os.path.exists(local_dir):
-        snapshot_download(repo_id="nvidia/audio-flamingo-2", local_dir="../../audio-flamingo-2")
+#     local_dir = "../../audio-flamingo-2"
+#     if not os.path.exists(local_dir):
+#         snapshot_download(repo_id="nvidia/audio-flamingo-2", local_dir="../../audio-flamingo-2")
 
-    config = yaml.load(open("/root/SGBench/src/models/src_audio_flamingo/configs/inference.yaml"), Loader=yaml.FullLoader)
+#     config = yaml.load(open("/root/SGBench/src/models/src_audio_flamingo/configs/inference.yaml"), Loader=yaml.FullLoader)
 
-    data_config = config['data_config']
-    model_config = config['model_config']
-    clap_config = config['clap_config']
-    args = Dict2Class(config['train_config'])
+#     data_config = config['data_config']
+#     model_config = config['model_config']
+#     clap_config = config['clap_config']
+#     args = Dict2Class(config['train_config'])
 
-    model, tokenizer = create_model_and_transforms(
-        **model_config,
-        clap_config=clap_config, 
-        use_local_files=args.offline,
-        gradient_checkpointing=args.gradient_checkpointing,
-        freeze_lm_embeddings=args.freeze_lm_embeddings,
-    )
+#     model, tokenizer = create_model_and_transforms(
+#         **model_config,
+#         clap_config=clap_config, 
+#         use_local_files=args.offline,
+#         gradient_checkpointing=args.gradient_checkpointing,
+#         freeze_lm_embeddings=args.freeze_lm_embeddings,
+#     )
 
-    device_id = 0
-    # model = model.to(device_id)
-    model.eval()
+#     device_id = 0
+#     # model = model.to(device_id)
+#     model.eval()
 
-    # Load metadata
-    with open("/root/SGBench/audio-flamingo-2/safe_ckpt/metadata.json", "r") as f:
-        metadata = json.load(f)
+#     # Load metadata
+#     with open("/root/SGBench/audio-flamingo-2/safe_ckpt/metadata.json", "r") as f:
+#         metadata = json.load(f)
 
-    # Reconstruct the full state_dict
-    state_dict = {}
+#     # Reconstruct the full state_dict
+#     state_dict = {}
 
-    # Load each SafeTensors chunk
-    for chunk_name in metadata:
-        chunk_path = f"/root/SGBench/audio-flamingo-2/safe_ckpt/{chunk_name}.safetensors"
-        chunk_tensors = load_file(chunk_path)
+#     # Load each SafeTensors chunk
+#     for chunk_name in metadata:
+#         chunk_path = f"/root/SGBench/audio-flamingo-2/safe_ckpt/{chunk_name}.safetensors"
+#         chunk_tensors = load_file(chunk_path)
 
-        # Merge tensors into state_dict
-        state_dict.update(chunk_tensors)
+#         # Merge tensors into state_dict
+#         state_dict.update(chunk_tensors)
 
-    missing_keys, unexpected_keys = model.load_state_dict(state_dict, False)
+#     missing_keys, unexpected_keys = model.load_state_dict(state_dict, False)
 
-    autocast = get_autocast(
-        args.precision, cache_enabled=(not args.fsdp)
-    )
+#     autocast = get_autocast(
+#         args.precision, cache_enabled=(not args.fsdp)
+#     )
 
-    cast_dtype = get_cast_dtype(args.precision)
+#     cast_dtype = get_cast_dtype(args.precision)
 
-    data = []
-    with open(parsed_args.input, "r", encoding="utf-8") as file:
-        for line in file:
-            data.append(json.loads(line.strip()))
+#     data = []
+#     with open(parsed_args.input, "r", encoding="utf-8") as file:
+#         for line in file:
+#             data.append(json.loads(line.strip()))
 
-    inference_kwargs = {
-        "do_sample": True,
-        "top_k": 30,
-        "top_p": 0.95,
-        "num_return_sequences": 1
-    }
+#     inference_kwargs = {
+#         "do_sample": True,
+#         "top_k": 30,
+#         "top_p": 0.95,
+#         "num_return_sequences": 1
+#     }
 
-    for item in data:
-        predict(item['path'], item['prompt'], clap_config, inference_kwargs)
+#     for item in data:
+#         predict(item['path'], item['prompt'], clap_config, inference_kwargs)
