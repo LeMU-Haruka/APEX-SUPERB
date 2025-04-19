@@ -18,7 +18,7 @@ class GPTScoreEvaluator(Evaluator):
         self.task = task
         self.meta_file = meta_file
         self.client = CLIENT_MAP[api]()
-        self.metric = gpt_empathy_score if task == 'empathy_score' else gpt_content_score
+        self.metric = gpt_empathy_score if task == 'alpaca_empathy' else gpt_content_score
 
     def evaluate(self, data):
         print(f"Processing evaluation for model '{self.model_name}' on evaluator: '{self.task}'")

@@ -21,7 +21,7 @@ class GeminiClient:
 
     def __call_api(self, message):
         # delay to avoid to meet rate limit
-        time.sleep(random.uniform(1.5, 3.5))
+        # time.sleep(random.uniform(1.5, 3.5))
         # generation_config = types.GenerateContentConfig(
         #     temperature=0.5,  # 从kwargs中获取，如果没有则使用默认值
         #     # top_k=40,

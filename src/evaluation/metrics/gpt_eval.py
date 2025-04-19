@@ -178,11 +178,14 @@ def gpt_empathy_score(client, data):
             empathy = json_response['score']['empathy']
             content = json_response['score']['content']
             clarity = json_response['score']['clarity']
-        except json.JSONDecodeError as e:
+        except BaseException as e:
             print("Response formant error")
             print(e)
             print(response)
             failed += 1
+            item['empathy'] = -1
+            item['content'] = -1
+            item['clarity'] = -1
             continue
         empathy_score += empathy
         content_score += content

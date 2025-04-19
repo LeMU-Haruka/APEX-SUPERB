@@ -67,6 +67,3 @@ class DeSTA2(BaseModel):
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
         return response
-
-
-# debug
