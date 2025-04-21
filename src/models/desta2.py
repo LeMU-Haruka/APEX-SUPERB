@@ -13,9 +13,11 @@ class DeSTA2(BaseModel):
         max_new_tokens=2048,
     ):
         assert sr == 16000
+        cache_audio = 'cache/desta2_temp.wav'
+        sf.write(cache_audio, audio, sr)
         messages = [
                     {"role": "system", "content": "You are a helpful voice assistant."},
-                    {"role": "audio", "content": audio}
+                    {"role": "audio", "content": cache_audio}
                 ]
         generated_ids = self.model.chat(
             messages, 

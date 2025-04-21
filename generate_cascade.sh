@@ -13,7 +13,7 @@ gpu_id=$3
 group=$4
 
 
-num_groups=2
+num_groups=1
 # 判断 group 参数是否在 num_groups 范围内
 if ! [[ "$group" =~ ^[0-9]+$ ]] || [ "$group" -ge "$num_groups" ] || [ "$group" -lt 0 ]; then
   echo "错误：group 参数必须在 0 到 $((num_groups - 1)) 之间"
@@ -23,25 +23,28 @@ fi
 
 
 # 设置 CUDA_VISIBLE_DEVICES 环境变量，确保脚本只使用指定的 GPU
-export CUDA_VISIBLE_DEVICES=5,$gpu_id
+export CUDA_VISIBLE_DEVICES=3,$gpu_id
 echo "[$CUDA_VISIBLE_DEVICES]"
 
 # 定义你要遍历的 task 列表
 tasks=(
-    # instruction tasks
-    "text_instruct_st"
-    "ifeval"
-    "gsm8k_fewshot_1"
-    "gsm8k_fewshot_2"
-    "gsm8k_fewshot_4"
-    "gsm8k_fewshot_8"
+    "dialogue_ser"
+    "emotion_recognition"
+    "text_instruct_asr"
+    # # instruction tasks
+    # "text_instruct_st"
+    # "ifeval"
+    # "gsm8k_fewshot_1"
+    # "gsm8k_fewshot_2"
+    # "gsm8k_fewshot_4"
+    # "gsm8k_fewshot_8"
 
-    # QA and reasoning tasks
-    "gsm8k"
-    "alpaca_empathy"
-    "mmlu"
-    "alpaca_eval"
-    "speaker_role"
+    # # QA and reasoning tasks
+    # "gsm8k"
+    # "alpaca_empathy"
+    # "mmlu"
+    # "alpaca_eval"
+    # "speaker_role"
 )
 
 total=${#tasks[@]}

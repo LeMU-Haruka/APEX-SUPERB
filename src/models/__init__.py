@@ -1,4 +1,4 @@
-from src.models.audio_flamingo import AudioFlamingo2
+# from src.models.audio_flamingo import AudioFlamingo2
 from src.models.baichuan import BaichuanAudio
 from src.models.cascaded_model import CascadedModel
 from src.models.desta2 import DeSTA2
@@ -10,6 +10,7 @@ from src.models.qwen2 import Qwen2Audio
 from src.models.qwen25_omni import Qwen25Omni
 from src.models.salmonn import SALMONN
 from src.models.phi4 import Phi4Multimodal
+from src.models.ultravox import Ultralvox
 
 models_map = {
     'cascaded_model': CascadedModel,
@@ -26,5 +27,6 @@ models_map = {
     'phi4': Phi4Multimodal, # https://huggingface.co/microsoft/Phi-4-multimodal-instruct
     'freeze_omni': FreezeOmni, # https://huggingface.co/VITA-MLLM/Freeze-Omni
     'desta2': DeSTA2, # https://huggingface.co/DeSTA-ntu/DeSTA2-8B-beta
-    'audio-flamingo': AudioFlamingo2
+    # 'audio-flamingo': AudioFlamingo2, will cause init very slow 
+    'ultravox': Ultralvox, # https://huggingface.co/fixie-ai/ultravox-v0_5-llama-3_1-8b
 }

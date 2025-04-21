@@ -59,3 +59,26 @@ class GeminiAudio(BaseModel):
         response_text = response.text
         # print(response_text)
         return response_text
+
+
+    
+    def chat_mode(self, audio, sr, max_new_tokens=2048):
+        audio_bytes = array_to_audio_bytes(audio, sr, fmt='wav')
+        instruction = 'You are a helpful speech assistant to answer the question of user.'
+        try:
+            response = self.__call_api(
+                instruction,
+                audio_bytes
+            )
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            print("Retrying...")
+            time.sleep(30)
+            response = self.__call_api(
+                instruction,
+                audio_bytes
+            )
+        
+        response_text = response.text
+        # print(response_text)
+        return response_text
