@@ -77,7 +77,7 @@ def build_prompt(item):
     prompt = ACCURACY_PROMPT
     prompt = prompt.replace("[INSTRUCTION]", item['prompt'])
     prompt = prompt.replace("[QUESTION]", item['question'])
-    prompt = prompt.replace("[PRED]", item['pred'])
+    prompt = prompt.replace("[PRED]", str(item['pred']))
     prompt = prompt.replace("[LABEL]", item['target'])
     return prompt
 
