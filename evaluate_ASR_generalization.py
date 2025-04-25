@@ -18,8 +18,8 @@ def wer_metric(preds, targets):
     print(f"Average WER: {WER:.3f}, Average CER: {CER:.3f}")
     # 返回dict格式
     return {
-        'wer': WER,
-        'cer': CER
+        'wer': round(WER * 100, 2),
+        'cer': round(CER * 100, 2)
     }
 
 

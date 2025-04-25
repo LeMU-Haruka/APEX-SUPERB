@@ -19,16 +19,9 @@ def merge_json_with_min_values(file1_path, file2_path, output_path):
                 elif isinstance(d1[key], (int, float)) and isinstance(d2[key], (int, float)):
                     merged[key] = min(d1[key], d2[key])
                 else:
-                    # 如果不是数字类型，保留第一个文件的值
                     raise ValueError
-                    # merged[key] = d1[key]
             else:
-                merged[key] = d1[key]
-        
-        # 添加d2中独有的键
-        for key in d2:
-            if key not in d1:
-                merged[key] = d2[key]
+                raise ValueError
         
         return merged
     
