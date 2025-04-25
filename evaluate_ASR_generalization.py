@@ -15,7 +15,7 @@ def wer_metric(preds, targets):
         CER += cer
     WER /= len(preds)
     CER /= len(preds)
-    print(f"Average WER: {WER:.3f}, Average CER: {CER:.3f}")
+    # print(f"Average WER: {WER:.3f}, Average CER: {CER:.3f}")
     # 返回dict格式
     return {
         'wer': round(WER * 100, 2),
@@ -67,11 +67,9 @@ def calculate_cer(predicted_sentence, ground_truth):
     cer = jiwer.cer(gt, pred)
     return cer
 
-output_dir = "../data/eval_results"
-os.makedirs(output_dir, exist_ok=True)
 
 def WER(file, type):
-    print(f"Caculating WER for  file: '{file}'")
+    # print(f"Caculating WER for  file: '{file}'")
     with open(file, 'r') as f:
         data = json.load(f)
     if type == "aligned":
@@ -109,7 +107,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_dir", '-i', type=str, default="../data/classified", help="输入JSON文件目录")
-    parser.add_argument("--type", '-t', type=str, required=True, choices=["pred", "aligned"], help="输出目录")
+    parser.add_argument("--type", '-t', type=str, required=True, choices=["pred", "aligned"])
     args = parser.parse_args()
     
     main(args)
