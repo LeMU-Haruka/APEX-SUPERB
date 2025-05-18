@@ -1,0 +1,18 @@
+[
+    {
+        "image_name": [
+            "./dummy/salmon.png",
+            "./dummy/4405327307.wav"
+        ],
+        "conversation": [
+            {
+                "from": "human",
+                "value": "Describe the image in detail"
+            },
+            {
+                "from": "gpt",
+                "value": "None"
+            }
+        ]
+    }
+]
