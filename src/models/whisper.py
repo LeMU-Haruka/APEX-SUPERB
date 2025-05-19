@@ -10,7 +10,6 @@ class Whisper(BaseModel):
         self.torch_dtype = torch.float16 if self.device.type == "cuda" else torch.float32
         self.asr_pipe = self.init_asr_pipeline(llm_path)
 
-
     def init_asr_pipeline(self, whisper_path):
         model = AutoModelForSpeechSeq2Seq.from_pretrained(
             whisper_path, torch_dtype=self.torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
@@ -38,7 +37,6 @@ class Whisper(BaseModel):
         transcription = result["text"]
         return transcription
 
-            
     def chat_mode(
         self,
         audio,
@@ -59,7 +57,6 @@ class Whisper(BaseModel):
         asr_text = self.asr(audio, sr)
         return asr_text
 
-
     def text_mode(self, prompt, text, max_new_tokens=1024):
         content = [{"type": "text", "text": text}]
         conversation = [
@@ -70,7 +67,7 @@ class Whisper(BaseModel):
         inputs = self.processor(text=inputs, audios=None, return_tensors="pt", padding=True)
         inputs = inputs.to("cuda")
 
-        generate_ids = self.model.generate(**inputs, max_length=2048)
+        generate_ids = self.model.generate(**inputs, max_length=1024)
         generate_ids = generate_ids[:, inputs.input_ids.size(1):]
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]

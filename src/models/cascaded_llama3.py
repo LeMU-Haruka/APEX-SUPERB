@@ -48,25 +48,8 @@ class CascadedLlama3(BaseModel):
         result = self.asr_pipe(audio)
         transcription = result["text"]
         return transcription
-        # inputs = self.processor(audio, return_tensors="pt")
-        # input_features = inputs.input_features.to(
-        #     self.asr_device, dtype=self.torch_dtype  # ② 再统一到模型的设备 & dtype
-        # )
-        # generated_ids  = self.asr_model.generate(inputs=input_features)
-        # transcription = self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-        # return transcription
-    
 
     def prompt_fomat(self, prompt, question):
-        # prompt_template = """
-        # <s>[INST] <<SYS>>
-        # You are a helpful assistant.
-        # <</SYS>>
-
-        # <PROMPT> 
-        # The question is: <QUESTION>
-        #  [/INST]
-        # """
         messages = [
             {"role": "system",
             "content": "You are a concise, knowledgeable assistant."},
@@ -79,17 +62,12 @@ class CascadedLlama3(BaseModel):
         return prompt_ids 
 
     def generate(self, prompt):
-        # input_ids = self.tokenizer(prompt, return_tensors="pt").to(self.device)
-        # outputs = self.model.generate(**input_ids, max_new_tokens=200, cache_implementation="static")
-        # response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-        # return response
         out_ids = self.model.generate(
             prompt,
             max_new_tokens=1024,
-            eos_token_id=self.tokenizer.eos_token_id,   # <|eot_id|>
+            eos_token_id=self.tokenizer.eos_token_id,
         )
         response = self.tokenizer.decode(out_ids[0][prompt.shape[-1]:], skip_special_tokens=True)
-        # print(response.strip())
         return response
                 
             
@@ -111,7 +89,6 @@ class CascadedLlama3(BaseModel):
             max_new_tokens=1024,
     ):
         asr_text = self.asr(audio, sr)
-        # prompt = prompt + ' The question is: ' + asr_text + '\nAnswer: '
         prompt = self.prompt_fomat(prompt, asr_text)
         response = self.generate(prompt)
         return response

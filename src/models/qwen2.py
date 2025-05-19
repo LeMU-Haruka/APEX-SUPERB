@@ -1,5 +1,4 @@
 from transformers import Qwen2AudioForConditionalGeneration, AutoProcessor
-
 from src.models.base_model import BaseModel
 
 

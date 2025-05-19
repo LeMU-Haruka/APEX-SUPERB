@@ -48,25 +48,9 @@ class CascadedQwen2(BaseModel):
         result = self.asr_pipe(audio)
         transcription = result["text"]
         return transcription
-        # inputs = self.processor(audio, return_tensors="pt")
-        # input_features = inputs.input_features.to(
-        #     self.asr_device, dtype=self.torch_dtype  # ② 再统一到模型的设备 & dtype
-        # )
-        # generated_ids  = self.asr_model.generate(inputs=input_features)
-        # transcription = self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-        # return transcription
     
 
     def prompt_fomat(self, prompt, question):
-        # prompt_template = """
-        # <s>[INST] <<SYS>>
-        # You are a helpful assistant.
-        # <</SYS>>
-
-        # <PROMPT> 
-        # The question is: <QUESTION>
-        #  [/INST]
-        # """
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "### Task Instruction\n" + prompt + "\n\n### Question\n" + question}
@@ -127,7 +111,7 @@ class CascadedQwen2(BaseModel):
         inputs = self.processor(text=inputs, audios=None, return_tensors="pt", padding=True)
         inputs = inputs.to("cuda")
 
-        generate_ids = self.model.generate(**inputs, max_length=2048)
+        generate_ids = self.model.generate(**inputs, max_length=1024)
         generate_ids = generate_ids[:, inputs.input_ids.size(1):]
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]

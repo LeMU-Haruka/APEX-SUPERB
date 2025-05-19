@@ -1,10 +1,10 @@
 import os
-from transformers import AutoModel, AutoTokenizer
-from transformers import WhisperFeatureExtractor, AutoTokenizer
 import torch
+from transformers import AutoModel, AutoTokenizer, WhisperFeatureExtractor
 from .src_glm.speech_tokenizer.utils import extract_speech_token
 from .src_glm.speech_tokenizer.modeling_whisper import WhisperVQEncoder
 from src.models.base_model import BaseModel
+
 
 class Glm4Voice(BaseModel):
     def __init__(self, llm_path='THUDM/glm-4-voice-9b'):
@@ -45,7 +45,6 @@ class Glm4Voice(BaseModel):
         for item in rtn[0]:
             if item < audio_offset:
                 text_tokens.append(item)
-        # logger.info(text_tokens)
         return self.glm_tokenizer.decode(text_tokens, ignore_special_tokens=False)
     
 
@@ -77,9 +76,7 @@ class Glm4Voice(BaseModel):
         for item in rtn[0]:
             if item < audio_offset:
                 text_tokens.append(item)
-        # logger.info(text_tokens)
         response = self.glm_tokenizer.decode(text_tokens, ignore_special_tokens=False)
-        print(response)
         return response
 
     def generate_text(
@@ -90,7 +87,6 @@ class Glm4Voice(BaseModel):
         history.append({"role": "user", "content": text})
         user_input = text
         system_prompt = "User will provide you with a text instruction. Do it step by step. First, think about the instruction and respond in a interleaved manner, with 13 text token followed by 26 audio tokens."
-        # system_prompt = "User will provide you with a text instruction. Do it step by step. First, think about the instruction and respond in text tokens only."
         inputs = f"<|system|>\n{system_prompt}"
         inputs += f"<|user|>\n{user_input}<|assistant|>streaming_transcription\n"
         inputs = self.glm_tokenizer([inputs], return_tensors="pt")
@@ -101,5 +97,4 @@ class Glm4Voice(BaseModel):
         for item in rtn[0]:
             if item < audio_offset:
                 text_tokens.append(item)
-        # logger.info(text_tokens)
         return self.glm_tokenizer.decode(text_tokens, ignore_special_tokens=False)

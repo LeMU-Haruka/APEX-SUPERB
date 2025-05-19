@@ -12,14 +12,12 @@ class GPT4oAudio(BaseModel):
             api_key=openai_api_key,
         )
 
-
     def __call_api(
         self,
         instruction,
         audio_bytes,
     ):
         response = self.client.chat.completions.create(
-            # model="gpt-4o-mini-audio-preview",
             model='gpt-4o-audio-preview',
             modalities=["text"],
             messages=instruction,
@@ -27,7 +25,6 @@ class GPT4oAudio(BaseModel):
             temperature=0.7,
         )
         return response
-        
 
     def prompt_mode(
         self,
@@ -39,18 +36,18 @@ class GPT4oAudio(BaseModel):
         audio_bytes = array_to_audio_bytes(audio, sr)
         encoded_string = base64.b64encode(audio_bytes).decode('utf-8')
         messages = [
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": [
-                        {"type": "text", "text": prompt},
-                                        {
-                        "type": "input_audio",
-                        "input_audio": {
-                            "data": encoded_string,
-                            "format": "wav"
-                        }
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": [
+                {"type": "text", "text": prompt},
+                {
+                    "type": "input_audio",
+                    "input_audio": {
+                        "data": encoded_string,
+                        "format": "wav"
                     }
-                    ]}
-                ]
+                }
+            ]}
+        ]
         try:
             response = self.__call_api(messages, encoded_string)
         except Exception as e:
@@ -74,17 +71,17 @@ class GPT4oAudio(BaseModel):
         audio_bytes = array_to_audio_bytes(audio, sr)
         encoded_string = base64.b64encode(audio_bytes).decode('utf-8')
         messages = [
-                    {"role": "system", "content": "You are a helpful speech assistant to answer question of user."},
-                    {"role": "user", "content": [
-                        {
-                        "type": "input_audio",
-                        "input_audio": {
-                            "data": encoded_string,
-                            "format": "wav"
-                        }
+            {"role": "system", "content": "You are a helpful speech assistant to answer question of user."},
+            {"role": "user", "content": [
+                {
+                    "type": "input_audio",
+                    "input_audio": {
+                        "data": encoded_string,
+                        "format": "wav"
                     }
-                    ]}
-                ]
+                }
+            ]}
+        ]
         try:
             response = self.__call_api(messages, encoded_string)
         except Exception as e:

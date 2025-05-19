@@ -6,13 +6,13 @@ from src.models.base_model import BaseModel
 class Qwen25Omni(BaseModel):
     def __init__(self, llm_path='Qwen/Qwen2.5-Omni-7B'):
         self.processor = Qwen2_5OmniProcessor.from_pretrained(llm_path)
-        self.model = Qwen2_5OmniForConditionalGeneration.from_pretrained(llm_path, 
-                                                      torch_dtype="auto", 
-                                                      device_map="auto", 
-                                                      attn_implementation="eager",
-                                                      )
+        self.model = Qwen2_5OmniForConditionalGeneration.from_pretrained(
+            llm_path, 
+            torch_dtype="auto", 
+            device_map="auto", 
+            attn_implementation="eager",
+        )
         self.model.to("cuda")
-
 
     def chat_mode(
         self,

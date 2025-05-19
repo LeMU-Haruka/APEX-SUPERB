@@ -1,5 +1,4 @@
 import transformers
-
 from src.models.base_model import BaseModel
 
 
@@ -36,7 +35,7 @@ class Ultralvox(BaseModel):
                 "role": "system",
                 "content": "You are a friendly and helpful character. You love to answer questions for people."
             },
-                        {
+            {
                 "role": "user",
                 "content": prompt
             },

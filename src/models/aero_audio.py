@@ -1,5 +1,4 @@
 from transformers import AutoModelForCausalLM, AutoProcessor
-
 from src.models.base_model import BaseModel
 
 
@@ -76,7 +75,6 @@ class AeroAudio(BaseModel):
         response = self.processor.batch_decode(cont, skip_special_tokens=True)[0]
         return response
 
-
     def text_mode(self, prompt, text, max_new_tokens=1024):
         content = [{"type": "text", "text": text}]
         conversation = [
@@ -87,11 +85,8 @@ class AeroAudio(BaseModel):
         inputs = self.processor(text=inputs, audios=None, return_tensors="pt", padding=True)
         inputs = inputs.to("cuda")
 
-        generate_ids = self.model.generate(**inputs, max_length=2048)
+        generate_ids = self.model.generate(**inputs, max_length=1024)
         generate_ids = generate_ids[:, inputs.input_ids.size(1):]
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
         return response
-
-
-# debug
