@@ -21,9 +21,10 @@ cd APEX-SUPERB
 ```
 
 2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+> **Important Note on Model Dependencies**: Due to version conflicts in modules such as Hugging Face Transformers, some models may require different versions of dependencies. We recommend:
+> - Commenting out conflicting models in `src/models/__init__.py` to avoid blocking other model tests
+> - Creating separate virtual environments for models with conflicting dependencies
+> - Installing specific versions of dependencies for each model as needed
 
 ## 🔧 Data Preparation
 
@@ -33,7 +34,7 @@ Download all necessary datasets for evaluation using our preparation script:
 python src/datasets/prepare.py
 ```
 
-This will download all datasets to `APEX-SUPERB/local_datasets/`.
+This will download all datasets to `./local_datasets/`.
 
 ## 🚀 Running Evaluations
 
@@ -41,7 +42,7 @@ This will download all datasets to `APEX-SUPERB/local_datasets/`.
 
 You can evaluate models in two ways:
 
-#### Option 1: Using the Shell Script
+#### Option 1: Using one line commands
 ```bash
 ./generate.sh {model_name} {model_path} {gpu} {split}
 ```
@@ -55,6 +56,7 @@ Available models include:
 - Closed-source: `gemini`, `gpt4`
 - Open-source: `whisper`, `qwen2`, `salmonn`, etc.
 - Cascaded: `cascaded_llama3`, `cascaded_qwen2`
+All model supported are in model register [file](src/models/__init__.py).
 
 ### 2. Evaluate Results
 

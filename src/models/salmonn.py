@@ -10,7 +10,11 @@ from src.models.src_salmonn.models.salmonn import SALMONNModel
 from src.models.src_salmonn.utils import move_to_cuda
 
 class SALMONN(BaseModel):
-    def __init__(self, llm_path='/userhome/models/SALMONN'):
+    """
+    Follow the guide in Hugging Face tsinghua-ee/SALMONN
+    We use the vicuna 13b-v1.1 model as the LLM
+    """
+    def __init__(self, llm_path='tsinghua-ee/SALMONN'):
         config_path = 'src/models/src_salmonn/configs/decode_config.yaml'
         self.cfg = Config(config_path)
 
@@ -45,7 +49,7 @@ class SALMONN(BaseModel):
         self,
         audio,
         sr,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         samples = self.prepare_one_sample(audio, sr) 
         prompt = [
@@ -59,7 +63,7 @@ class SALMONN(BaseModel):
             prompt,
             audio,
             sr,
-            max_new_tokens=2048,
+            max_new_tokens=1024,
             ):
         samples = self.prepare_one_sample(audio, sr) 
         prompt = [
@@ -69,7 +73,7 @@ class SALMONN(BaseModel):
         return response
 
 
-    def text_mode(self, prompt, text, max_new_tokens=2048):
+    def text_mode(self, prompt, text, max_new_tokens=1024):
         content = [{"type": "text", "text": text}]
         conversation = [
             {"role": "user", "content": content},

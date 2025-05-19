@@ -16,7 +16,7 @@ class AeroAudio(BaseModel):
         self,
         audio,
         sr,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         assert sr == 16000
         messages = [
@@ -35,7 +35,7 @@ class AeroAudio(BaseModel):
         prompt = self.processor.apply_chat_template(messages, add_generation_prompt=True)
         inputs = self.processor(text=prompt, audios=audios, sampling_rate=16000, return_tensors="pt")
         inputs = {k: v.to("cuda") for k, v in inputs.items()}
-        outputs = self.model.generate(**inputs, eos_token_id=151645, max_new_tokens=4096)
+        outputs = self.model.generate(**inputs, eos_token_id=151645, max_new_tokens=max_new_tokens)
 
         cont = outputs[:, inputs["input_ids"].shape[-1] :]
 
@@ -47,7 +47,7 @@ class AeroAudio(BaseModel):
             prompt,
             audio,
             sr,
-            max_new_tokens=2048,
+            max_new_tokens=1024,
     ):
         messages = [
             {
@@ -69,7 +69,7 @@ class AeroAudio(BaseModel):
         prompt = self.processor.apply_chat_template(messages, add_generation_prompt=True)
         inputs = self.processor(text=prompt, audios=audios, sampling_rate=16000, return_tensors="pt")
         inputs = {k: v.to("cuda") for k, v in inputs.items()}
-        outputs = self.model.generate(**inputs, eos_token_id=151645, max_new_tokens=4096)
+        outputs = self.model.generate(**inputs, eos_token_id=151645, max_new_tokens=max_new_tokens)
 
         cont = outputs[:, inputs["input_ids"].shape[-1] :]
 
@@ -77,7 +77,7 @@ class AeroAudio(BaseModel):
         return response
 
 
-    def text_mode(self, prompt, text, max_new_tokens=2048):
+    def text_mode(self, prompt, text, max_new_tokens=1024):
         content = [{"type": "text", "text": text}]
         conversation = [
             {"role": "user", "content": content},

@@ -35,16 +35,11 @@ class MyModel(BaseModel):
         # sr: sampling rate (usually 16000)
         return response
         
-    def prompt_mode(self, instruction, audio, sr, max_new_tokens=2048):
+    def prompt_mode(self, instruction, audio, sr, max_new_tokens=1024):
         # Implement task-specific interaction
         # instruction: task-specific prompt
         # audio: audio waveform
         # sr: sampling rate
-        return response
-        
-    def text_mode(self, instruction, text, max_new_tokens=2048):
-        # Implement text-only interaction
-        # Optional: implement if your model supports text-only mode
         return response
 ```
 

@@ -6,7 +6,7 @@ from src.models.src_salmonn.models.modeling_whisper import WhisperForConditional
 
 
 class CascadedQwen2(BaseModel):
-    def __init__(self, llm_path='Qwen/Qwen2-7B-Instruct', whisper_path='/userhome/models/whisper-large-v3'):
+    def __init__(self, llm_path='Qwen/Qwen2-7B-Instruct', whisper_path='openai/whisper-large-v3'):
         self.asr_device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.llm_device = torch.device("cuda:1")
         print(f"ASR device: {self.asr_device}, LLM device: {self.llm_device}")
@@ -80,13 +80,9 @@ class CascadedQwen2(BaseModel):
         return model_inputs 
 
     def generate(self, model_inputs):
-        # input_ids = self.tokenizer(prompt, return_tensors="pt").to(self.device)
-        # outputs = self.model.generate(**input_ids, max_new_tokens=200, cache_implementation="static")
-        # response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-        # return response
         generated_ids = self.model.generate(
             model_inputs.input_ids,
-            max_new_tokens=512,
+            max_new_tokens=1024,
             eos_token_id=self.tokenizer.eos_token_id,   # <|eot_id|>
         )
         generated_ids = [
@@ -100,7 +96,7 @@ class CascadedQwen2(BaseModel):
     def chat_mode(
         self,
         audio,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         asr_text = self.asr(audio)
         prompt = self.prompt_fomat('', asr_text)
@@ -112,7 +108,7 @@ class CascadedQwen2(BaseModel):
             prompt,
             audio,
             sr,
-            max_new_tokens=2048,
+            max_new_tokens=1024,
     ):
         asr_text = self.asr(audio, sr)
         # prompt = prompt + ' The question is: ' + asr_text + '\nAnswer: '
@@ -121,7 +117,7 @@ class CascadedQwen2(BaseModel):
         return response
 
 
-    def text_mode(self, prompt, text, max_new_tokens=2048):
+    def text_mode(self, prompt, text, max_new_tokens=1024):
         content = [{"type": "text", "text": text}]
         conversation = [
             {"role": "user", "content": content},

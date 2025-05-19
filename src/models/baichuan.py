@@ -1,5 +1,4 @@
 import torch
-import torchaudio
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import re
 import ujson
@@ -10,10 +9,9 @@ import soundfile as sf
 from src.models.base_model import BaseModel
 
 
-# BAICHUAN_PATH = "baichuan-inc/Baichuan-Omni-1d5"
 class BaichuanAudio(BaseModel):
 
-    def __init__(self, llm_path='/userhome/models/Baichuan-Audio-Instruct'):
+    def __init__(self, llm_path='baichuan-inc/Baichuan-Audio-Instruct'):
         self.role_prefix = {
             'system': '<B_SYS>',
             'user': '<C_Q>',
@@ -40,7 +38,7 @@ class BaichuanAudio(BaseModel):
         self,
         audio,
         sr,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         with tempfile.NamedTemporaryFile(delete=False, suffix=f".wav") as temp_file:
             temp_filename = temp_file.name
@@ -84,7 +82,7 @@ class BaichuanAudio(BaseModel):
         prompt,
         audio,
         sr,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         with tempfile.NamedTemporaryFile(delete=False, suffix=f".wav") as temp_file:
             temp_filename = temp_file.name
@@ -120,14 +118,3 @@ class BaichuanAudio(BaseModel):
         full_text = re.sub(self.special_token_partten, '', text_segment)
 
         return full_text
-
-
-def load_audio(audio_path):
-    wave, sr = sf.read(audio_path)
-    return {'array': wave, 'sampling_rate': sr}
-
-
-# wave = load_audio("/userhome/datasets/LibriSpeech/test-clean/61/70968/61-70968-0000.flac")
-# model = Baichuan()
-#
-# output = model.generate_audio(wave)

@@ -85,7 +85,7 @@ class CascadedLlama3(BaseModel):
         # return response
         out_ids = self.model.generate(
             prompt,
-            max_new_tokens=300,
+            max_new_tokens=1024,
             eos_token_id=self.tokenizer.eos_token_id,   # <|eot_id|>
         )
         response = self.tokenizer.decode(out_ids[0][prompt.shape[-1]:], skip_special_tokens=True)
@@ -96,7 +96,7 @@ class CascadedLlama3(BaseModel):
     def chat_mode(
         self,
         audio,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         asr_text = self.asr(audio)
         prompt = self.prompt_fomat('', asr_text)
@@ -108,30 +108,10 @@ class CascadedLlama3(BaseModel):
             prompt,
             audio,
             sr,
-            max_new_tokens=2048,
+            max_new_tokens=1024,
     ):
         asr_text = self.asr(audio, sr)
         # prompt = prompt + ' The question is: ' + asr_text + '\nAnswer: '
         prompt = self.prompt_fomat(prompt, asr_text)
         response = self.generate(prompt)
         return response
-
-
-    def text_mode(self, prompt, text, max_new_tokens=2048):
-        content = [{"type": "text", "text": text}]
-        conversation = [
-            {"role": "user", "content": content},
-        ]
-        inputs = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
-
-        inputs = self.processor(text=inputs, audios=None, return_tensors="pt", padding=True)
-        inputs = inputs.to("cuda")
-
-        generate_ids = self.model.generate(**inputs, max_length=2048)
-        generate_ids = generate_ids[:, inputs.input_ids.size(1):]
-
-        response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-        return response
-
-
-# debug

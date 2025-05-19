@@ -34,7 +34,7 @@ class GPT4oAudio(BaseModel):
         prompt,
         audio,
         sr,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         audio_bytes = array_to_audio_bytes(audio, sr)
         encoded_string = base64.b64encode(audio_bytes).decode('utf-8')
@@ -69,7 +69,7 @@ class GPT4oAudio(BaseModel):
         self,
         audio,
         sr,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         audio_bytes = array_to_audio_bytes(audio, sr)
         encoded_string = base64.b64encode(audio_bytes).decode('utf-8')

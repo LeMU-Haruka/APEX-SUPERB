@@ -5,7 +5,7 @@ from src.models.base_model import BaseModel
 
 
 class Whisper(BaseModel):
-    def __init__(self, llm_path='/userhome/models/whisper-large-v3'):
+    def __init__(self, llm_path='openai/whisper-large-v3'):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.torch_dtype = torch.float16 if self.device.type == "cuda" else torch.float32
         self.asr_pipe = self.init_asr_pipeline(llm_path)
@@ -42,7 +42,7 @@ class Whisper(BaseModel):
     def chat_mode(
         self,
         audio,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         asr_text = self.asr(audio)
         prompt = self.prompt_fomat('', asr_text)
@@ -54,13 +54,13 @@ class Whisper(BaseModel):
             prompt,
             audio,
             sr,
-            max_new_tokens=2048,
+            max_new_tokens=1024,
     ):
         asr_text = self.asr(audio, sr)
         return asr_text
 
 
-    def text_mode(self, prompt, text, max_new_tokens=2048):
+    def text_mode(self, prompt, text, max_new_tokens=1024):
         content = [{"type": "text", "text": text}]
         conversation = [
             {"role": "user", "content": content},
