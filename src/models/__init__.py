@@ -26,8 +26,8 @@ models_map = {
     'gpt': GPT4oAudio, # gpt-4o-audio api
 
     # SLLM
-    'qwen2-audio': Qwen2Audio,
-    'baichuan_audio': BaichuanAudio,
+    'qwen2-audio': Qwen2Audio, # https://huggingface.co/Qwen/Qwen2-Audio-7B-Instruct
+    'baichuan_audio': BaichuanAudio, # https://huggingface.co/baichuan-inc/Baichuan-Audio-Instruct
     # 'qwen25-omni': Qwen25Omni, # https://huggingface.co/Qwen/Qwen2.5-Omni-7B
     'salmonn': SALMONN, # https://github.com/bytedance/SALMONN
     'glm': Glm4Voice, # https://huggingface.co/THUDM/glm-4-voice-9b
@@ -37,6 +37,5 @@ models_map = {
     # 'audio-flamingo': AudioFlamingo2, will cause init very slow 
     'ultravox': Ultralvox, # https://huggingface.co/fixie-ai/ultravox-v0_5-llama-3_1-8b
     'kimi_audio': Kimi, # https://huggingface.co/moonshotai/Kimi-Audio-7B-Instruct
-
     'aero-audio': AeroAudio, # https://huggingface.co/lmms-lab/Aero-1-Audio
 }
