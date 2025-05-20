@@ -41,7 +41,6 @@ def main():
     for file in evaluated_files:
         with open(file, 'r') as f:
             data = json.load(f)
-        # evaluator = EVALUATOR_MAP[args.task]()
         if evaluator_type is None:
             task = file.split('-')[-1].split('.')[0]
         else:

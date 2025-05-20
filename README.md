@@ -102,6 +102,8 @@ Our task dataset follows the same format as [DYNAMIC-SUPERB](https://github.com/
 1. Use Hugging Face datasets directly by specifying the repo name as `{task_name}`
 2. Save local data in the `local_datasets` directory using the same structure as `{task_name}`
 
+Therefore, all tasks in [DYNAMIC-SUPERB](https://huggingface.co/DynamicSuperb) can directly run on our framework.
+
 ## 📝 Citation
 
 ```bibtex
@@ -115,9 +117,9 @@ We welcome contributions! Please:
 2. Create a feature branch
 3. Submit a pull request
 
-## 📄 License
+<!-- ## 📄 License
 
-[License information will be added]
+[License information will be added] -->
 
 ## 📬 Contact
 

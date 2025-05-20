@@ -1,8 +1,8 @@
 import os
 import torch
 from transformers import AutoModel, AutoTokenizer, WhisperFeatureExtractor
-from .src_glm.speech_tokenizer.utils import extract_speech_token
-from .src_glm.speech_tokenizer.modeling_whisper import WhisperVQEncoder
+from .glm_modules.speech_tokenizer.utils import extract_speech_token
+from .glm_modules.speech_tokenizer.modeling_whisper import WhisperVQEncoder
 from src.models.base_model import BaseModel
 
 

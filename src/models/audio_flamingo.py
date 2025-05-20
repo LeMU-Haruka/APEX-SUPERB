@@ -15,7 +15,7 @@ from safetensors.torch import load_file
 from huggingface_hub import snapshot_download
 
 from src.models.base_model import BaseModel
-from src.models.src_audio_flamingo.factory import create_model_and_transforms
+from src.models.audio_flamingo_modules.factory import create_model_and_transforms
 from src.models.utils import Dict2Class, get_autocast, get_cast_dtype
 
 def int16_to_float32(x):
@@ -80,9 +80,6 @@ class AudioFlamingo2(BaseModel):
             "top_p": 0.95,
             "num_return_sequences": 1
         }
-
-        # for item in data:
-        #     self.predict(item['path'], item['prompt'])
 
     def get_num_windows(self, T, sr, clap_config):
 

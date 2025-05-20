@@ -4,9 +4,9 @@ import torch
 from src.models.base_model import BaseModel
 from transformers import WhisperFeatureExtractor
 
-from src.models.src_salmonn.config import Config
-from src.models.src_salmonn.models.salmonn import SALMONNModel
-from src.models.src_salmonn.utils import move_to_cuda
+from src.models.ssalmonn_modules.config import Config
+from src.models.ssalmonn_modules.models.salmonn import SALMONNModel
+from src.models.ssalmonn_modules.utils import move_to_cuda
 
 
 class SALMONN(BaseModel):

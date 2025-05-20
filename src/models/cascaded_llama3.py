@@ -2,7 +2,7 @@ import torch
 from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq, pipeline, AutoModelForCausalLM, AutoTokenizer
 
 from src.models.base_model import BaseModel
-from src.models.src_salmonn.models.modeling_whisper import WhisperForConditionalGeneration
+from src.models.ssalmonn_modules.models.modeling_whisper import WhisperForConditionalGeneration
 
 
 class CascadedLlama3(BaseModel):

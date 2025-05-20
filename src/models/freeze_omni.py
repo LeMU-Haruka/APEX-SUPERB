@@ -6,7 +6,7 @@ import math
 import torchaudio.compliance.kaldi as k
 from huggingface_hub import snapshot_download
 
-from src.models.src_freeze_omni.pipeline import inferencePipeline
+from src.models.freeze_omni_modules.pipeline import inferencePipeline
 
 
 class audioEncoderProcessor:
