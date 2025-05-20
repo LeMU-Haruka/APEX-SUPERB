@@ -17,7 +17,7 @@ for task in TASK_LIST:
     if os.path.exists(os.path.join(output_dir, task)):
         print(f'{task} already exists, skip download')
         continue
-    repo = f'LeMUHaruka/{task}'
+    repo = f'APEX-SUPERB/{task}'
     dataset = load_dataset(repo, split='test')
 
     dataset.save_to_disk(os.path.join(output_dir, task))
