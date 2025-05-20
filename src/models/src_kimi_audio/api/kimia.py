@@ -6,9 +6,9 @@ from loguru import logger
 from huggingface_hub import cached_assets_path
 from transformers import AutoModelForCausalLM
 
-from src.models.kimi_audio_modules.models.detokenizer import get_audio_detokenizer
+from src.models.src_kimi_audio.models.detokenizer import get_audio_detokenizer
 from .prompt_manager import KimiAPromptManager
-from src.models.kimi_audio_modules.utils.sampler import KimiASampler
+from src.models.src_kimi_audio.utils.sampler import KimiASampler
 
 
 class KimiAudio(object):
