@@ -20,11 +20,40 @@ git clone https://github.com/your-org/APEX-SUPERB.git
 cd APEX-SUPERB
 ```
 
-2. Install dependencies:
-> **Important Note on Model Dependencies**: Due to version conflicts in modules such as Hugging Face Transformers, some models may require different versions of dependencies. We recommend:
-> - Commenting out conflicting models in `src/models/__init__.py` to avoid blocking other model tests
-> - Creating separate virtual environments for models with conflicting dependencies
-> - Installing specific versions of dependencies for each model as needed
+2. Create and activate a virtual environment (recommended):
+We highly recommend using **Python version ≤ 3.11**, as some modules still rely on the deprecated `distutils` module, which has been removed in Python 3.12. We are actively monitoring module compatibility and will provide updates as needed.
+
+```bash
+# Using conda (recommended)
+conda create -n apex python=3.11
+conda activate apex
+
+# Or using venv
+python3.11 -m venv venv
+# On Windows
+.\venv\Scripts\activate
+# On Linux/Mac
+source venv/bin/activate
+```
+
+3. Install dependencies:
+Due to the involvement of multiple models with varying requirements, we only provide a minimal `requirements.txt` containing key dependencies for the core modules. This helps keep the environment clean and avoids unnecessary conflicts. 
+
+You can install model-specific dependencies by referring to the documentation on each model’s GitHub repository or Hugging Face page.
+
+To install the core dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+> **Important Note on Model Dependencies**  
+> Due to version conflicts in modules such as Hugging Face Transformers, some models may require different versions of dependencies. We recommend:
+>
+> - Commenting out conflicting models in `src/models/__init__.py` to avoid blocking other model tests  
+> - Creating separate virtual environments for models with conflicting dependencies  
+> - Installing specific versions of dependencies for each model as needed  
+
 
 ## 🔧 Data Preparation
 
