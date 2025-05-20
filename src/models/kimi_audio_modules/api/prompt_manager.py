@@ -9,10 +9,10 @@ from huggingface_hub import cached_assets_path
 from transformers import AutoTokenizer
 
 
-from src.models.src_kimi_audio.models.tokenizer.whisper_Lv3.whisper import WhisperEncoder
-from src.models.src_kimi_audio.models.tokenizer.glm4_tokenizer import Glm4Tokenizer
-from src.models.src_kimi_audio.utils.data import KimiAContent
-from src.models.src_kimi_audio.utils.special_tokens import instantiate_extra_tokens
+from src.models.kimi_audio_modules.models.tokenizer.whisper_Lv3.whisper import WhisperEncoder
+from src.models.kimi_audio_modules.models.tokenizer.glm4_tokenizer import Glm4Tokenizer
+from src.models.kimi_audio_modules.utils.data import KimiAContent
+from src.models.kimi_audio_modules.utils.special_tokens import instantiate_extra_tokens
 
 
 class KimiAPromptManager:

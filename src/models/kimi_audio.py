@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from src.models.base_model import BaseModel
-from src.models.src_kimi_audio.api.kimia import KimiAudio
+from src.models.kimi_audio_modules.api.kimia import KimiAudio
 
 
 class Kimi(BaseModel):
