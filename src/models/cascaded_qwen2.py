@@ -2,7 +2,6 @@ import torch
 from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq, pipeline, AutoModelForCausalLM, AutoTokenizer
 
 from src.models.base_model import BaseModel
-from src.models.ssalmonn_modules.models.modeling_whisper import WhisperForConditionalGeneration
 
 
 class CascadedQwen2(BaseModel):
