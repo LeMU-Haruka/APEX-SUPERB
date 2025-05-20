@@ -10,20 +10,11 @@ from tqdm import tqdm
 
 from utils import set_seed
 
+# for some devices may need to set this
 # torch.backends.cuda.enable_mem_efficient_sdp(False)
 # torch.backends.cuda.enable_flash_sdp(False)
 
 set_seed(42)
-
-# def set_gpu(gpu_id):
-#     """
-#     设置要使用的 GPU。
-
-#     Args:
-#         gpu_id: 要使用的 GPU 的 ID (整数)。
-#     """
-#     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
-#     print(f"Set CUDA_VISIBLE_DEVICES to: {os.environ['CUDA_VISIBLE_DEVICES']}")
 
 
 def main():
@@ -31,8 +22,6 @@ def main():
     parser.add_argument('--model', type=str, default='qwen2-audio', choices=list(models_map.keys()))
     parser.add_argument('--model_path', type=str, default='')
     parser.add_argument('--task', type=str, default='asr')
-    # parser.add_argument('--output_dir', type=str, default='./result')
-    # parser.add_argument('--gpu', type=int, default=0)
     args = parser.parse_args()
 
     output_dir = args.model + '_result'
@@ -41,27 +30,18 @@ def main():
         os.makedirs(output_dir)
 
     task = args.task
-    # 遍历打印参数
+
+    # print parameters
     for key, value in vars(args).items():
         print(f'{key}: {value}')
 
-    # if task == 'asr':
-    #     data = load_asr_data()
-    # else:
+    # load dataset
     data = HFDataset(task, args.model)
-    # load data
-    # data = load_dataset('hlt-lab/voicebench', args.data, split=args.split)
-    # data = data.cast_column("audio", Audio(sampling_rate=16_000))
 
     # load model
     model = models_map[args.model](args.model_path)
-    # data = data.select([0,1,2,3,4,5])
 
-    # if args.modality == 'ttft':
-    #     # avoid cold start
-    #     _ = model.generate_ttft(data[0]['audio'])
 
-    # inference
     results = []
     for item in tqdm(data, total=len(data)):
         audio = item['audio']
@@ -82,7 +62,7 @@ def main():
 
     # save results
     output_file = f'{args.model}-{args.task}.json'
-    json_str = json.dumps(results, indent=4)  # Convert list of dictionaries to JSON string
+    json_str = json.dumps(results, indent=4)  
     with open(os.path.join(output_dir, output_file), 'w') as f:
         f.write(json_str)
     print('Evaluate finished! model: {}, task: {}, output_rsult: {}'.format(args.model, task, os.path.join(output_dir, output_file)))

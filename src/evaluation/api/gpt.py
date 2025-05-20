@@ -34,13 +34,13 @@ class GPTClient(Evaluator):
     def __call_api(self, prompt):
         message = self.__build_messages(prompt)
         completion = self.client.chat.completions.create(
-            model="gpt-4o-mini",  # 改为正式模型名 "gpt-4"
+            model="gpt-4o-mini",
             messages=message,
-            max_tokens=500,  # 控制生成的最大字数
-            temperature=0.5,  # 控制创造性，范围是 0 到 1，值越高，生成越随机
-            top_p=0.9,  # 通过概率质量选择生成的词汇，top_p 越高选择越多样
-            frequency_penalty=0,  # 控制重复度，越高越少重复
-            presence_penalty=0,  # 鼓励生成新的词汇
+            max_tokens=500, 
+            temperature=0.5,
+            top_p=0.9, 
+            frequency_penalty=0, 
+            presence_penalty=0,
             seed=42
         )
         return completion.choices[0].message.content

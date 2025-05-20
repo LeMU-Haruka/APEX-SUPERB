@@ -11,6 +11,7 @@ class GPT4oAudio(BaseModel):
         self.client = OpenAI(
             api_key=openai_api_key,
         )
+        self.llm_name = llm_path
 
     def __call_api(
         self,
@@ -18,10 +19,10 @@ class GPT4oAudio(BaseModel):
         audio_bytes,
     ):
         response = self.client.chat.completions.create(
-            model='gpt-4o-audio-preview',
+            model=self.llm_name,
             modalities=["text"],
             messages=instruction,
-            max_tokens=500,
+            max_tokens=1024,
             temperature=0.7,
         )
         return response
