@@ -1,4 +1,12 @@
 import os
+import sys
+from pathlib import Path
+
+# Add the project root directory to Python path
+project_root = str(Path(__file__).parent.parent.parent)
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
 from datasets import load_dataset
 from src.datasets.base_dataset import TASK_LIST
 
