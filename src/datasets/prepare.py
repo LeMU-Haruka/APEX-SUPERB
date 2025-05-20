@@ -1,6 +1,6 @@
 import os
 from datasets import load_dataset
-from .base_dataset import TASK_LIST
+from src.datasets.base_dataset import TASK_LIST
 
 output_dir = 'local_datasets'
 os.makedirs(output_dir, exist_ok=True)
