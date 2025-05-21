@@ -72,6 +72,7 @@ class HFDataset(Dataset):
             self.items= load_dataset(f'APEX-SUPERB/{task}', split='test')
         else:
             self.items = load_dataset(task, split='test')
+            self.task = task.split('/')[-1]
 
 
     def __getitem__(self, index):
@@ -90,6 +91,7 @@ class HFDataset(Dataset):
         item['sr'] = 16000
         item['audio'] = array
         item['kargs'] = {}
+        item['task'] = self.task
         for key in item.keys():
             if key not in ['audio', 'instruction', 'file', 'text', 'label', 'kargs', 'sr']:
                 item['kargs'][key] = item[key]

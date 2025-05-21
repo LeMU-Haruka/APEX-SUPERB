@@ -60,8 +60,9 @@ def main():
             'kargs': item['kargs'],
         })
 
+    task = results[0]['kargs']['task']
     # save results
-    output_file = f'{args.model}-{args.task}.json'
+    output_file = f'{args.model}-{task}.json'
     json_str = json.dumps(results, indent=4)  
     with open(os.path.join(output_dir, output_file), 'w') as f:
         f.write(json_str)
