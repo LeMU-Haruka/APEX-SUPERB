@@ -15,7 +15,7 @@ from safetensors.torch import load_file
 from huggingface_hub import snapshot_download
 
 from src.models.base_model import BaseModel
-from src.models.src_audio_flamingo.factory import create_model_and_transforms
+from src.models.audio_flamingo_modules.factory import create_model_and_transforms
 from src.models.utils import Dict2Class, get_autocast, get_cast_dtype
 
 def int16_to_float32(x):
@@ -31,7 +31,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 class AudioFlamingo2(BaseModel):
     
-    def __init__(self, llm_path='/userhome/models/audio-flamingo-2'):
+    def __init__(self, llm_path='nvidia/audio-flamingo-2'):
         config = yaml.load(open("src/models/src_audio_flamingo/configs/inference.yaml"), Loader=yaml.FullLoader)
 
         self.data_config = config['data_config']
@@ -80,9 +80,6 @@ class AudioFlamingo2(BaseModel):
             "top_p": 0.95,
             "num_return_sequences": 1
         }
-
-        # for item in data:
-        #     self.predict(item['path'], item['prompt'])
 
     def get_num_windows(self, T, sr, clap_config):
 
@@ -190,8 +187,7 @@ class AudioFlamingo2(BaseModel):
         
         return audio_clips, audio_embed_mask
 
-    def prompt_mode(self, prompt, audio, sr, max_new_tokens=2048):
-
+    def prompt_mode(self, prompt, audio, sr, max_new_tokens=1024):
         if not isinstance(audio, str):
             audio_cache = 'cache/temp.wav'
             sf.write(audio_cache, audio, sr, format='wav')
@@ -223,7 +219,7 @@ class AudioFlamingo2(BaseModel):
                 audio_x_mask=audio_embed_mask.unsqueeze(0),
                 lang_x=prompt,
                 eos_token_id=self.tokenizer.eos_token_id,
-                max_new_tokens=256,
+                max_new_tokens=max_new_tokens,
                 **self.inference_kwargs,
                 # temperature=0.0
             )[0]
@@ -237,73 +233,5 @@ class AudioFlamingo2(BaseModel):
         
         return output_decoded
     
-    def chat_mode(self, audio, sr, max_new_tokens=2048):
+    def chat_mode(self, audio, sr, max_new_tokens=1024):
         return self.prompt_mode('You are a helpful speech assistant', audio, sr, max_new_tokens)
-
-
-# if __name__ == "__main__":
-
-#     # parser = argparse.ArgumentParser()
-#     # parser.add_argument("--input", "-i", type=str, help="Path to input JSON file")
-#     # parsed_args = parser.parse_args()
-
-#     local_dir = "../../audio-flamingo-2"
-#     if not os.path.exists(local_dir):
-#         snapshot_download(repo_id="nvidia/audio-flamingo-2", local_dir="../../audio-flamingo-2")
-
-#     config = yaml.load(open("/root/SGBench/src/models/src_audio_flamingo/configs/inference.yaml"), Loader=yaml.FullLoader)
-
-#     data_config = config['data_config']
-#     model_config = config['model_config']
-#     clap_config = config['clap_config']
-#     args = Dict2Class(config['train_config'])
-
-#     model, tokenizer = create_model_and_transforms(
-#         **model_config,
-#         clap_config=clap_config, 
-#         use_local_files=args.offline,
-#         gradient_checkpointing=args.gradient_checkpointing,
-#         freeze_lm_embeddings=args.freeze_lm_embeddings,
-#     )
-
-#     device_id = 0
-#     # model = model.to(device_id)
-#     model.eval()
-
-#     # Load metadata
-#     with open("/root/SGBench/audio-flamingo-2/safe_ckpt/metadata.json", "r") as f:
-#         metadata = json.load(f)
-
-#     # Reconstruct the full state_dict
-#     state_dict = {}
-
-#     # Load each SafeTensors chunk
-#     for chunk_name in metadata:
-#         chunk_path = f"/root/SGBench/audio-flamingo-2/safe_ckpt/{chunk_name}.safetensors"
-#         chunk_tensors = load_file(chunk_path)
-
-#         # Merge tensors into state_dict
-#         state_dict.update(chunk_tensors)
-
-#     missing_keys, unexpected_keys = model.load_state_dict(state_dict, False)
-
-#     autocast = get_autocast(
-#         args.precision, cache_enabled=(not args.fsdp)
-#     )
-
-#     cast_dtype = get_cast_dtype(args.precision)
-
-#     data = []
-#     with open(parsed_args.input, "r", encoding="utf-8") as file:
-#         for line in file:
-#             data.append(json.loads(line.strip()))
-
-#     inference_kwargs = {
-#         "do_sample": True,
-#         "top_k": 30,
-#         "top_p": 0.95,
-#         "num_return_sequences": 1
-#     }
-
-#     for item in data:
-#         predict(item['path'], item['prompt'], clap_config, inference_kwargs)

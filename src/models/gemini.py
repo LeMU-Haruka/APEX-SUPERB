@@ -11,14 +11,19 @@ from src.utils import array_to_audio_bytes
 
 
 class GeminiAudio(BaseModel):
-    def __init__(self, llm_name='gemini-2.0-flash'):
+    def __init__(self, llm_path='gemini-1.5-pro'):
         # os.environ['HTTP_PROXY'] = "http://127.0.0.1:7890"
         self.client  = genai.Client(api_key='API KEY')
+        self.api_map = {
+            'gemini-1.5-pro': 'gemini-1.5-pro',
+            'gemin-2.5-flash': 'gemini-2.5-flash-preview-04-17',
+            'gemini-2.5-pro': 'gemini-2.5-pro-preview-05-06',
+        }
+        self.llm_name = self.api_map[llm_path]
 
     def __call_api(self, instruction, audio_bytes):
         response = self.client.models.generate_content(
-            # model='gemini-1.5-pro',
-            model='gemini-2.5-flash-preview-04-17',
+            model=self.llm_name,
             contents=[
                 instruction,
                 types.Part.from_bytes(
@@ -27,14 +32,14 @@ class GeminiAudio(BaseModel):
                 ),
             ],
             config=types.GenerateContentConfig(
-                max_output_tokens=500,
+                max_output_tokens=1024,
                 temperature=0.5
             )
         )
         return response
         
 
-    def prompt_mode(self, instruction, audio, sr, max_new_tokens=2048):
+    def prompt_mode(self, instruction, audio, sr, max_new_tokens=1024):
         # 为了避免出发每分钟请求上限，sleep
         # temp_wav = './cache/gemini_temp.wav'
         # sf.write(temp_wav, audio, sr)
@@ -63,7 +68,7 @@ class GeminiAudio(BaseModel):
 
 
     
-    def chat_mode(self, audio, sr, max_new_tokens=2048):
+    def chat_mode(self, audio, sr, max_new_tokens=1024):
         audio_bytes = array_to_audio_bytes(audio, sr, fmt='wav')
         instruction = 'You are a helpful speech assistant to answer the question of user.'
         try:

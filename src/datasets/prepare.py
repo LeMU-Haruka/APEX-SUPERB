@@ -1,50 +1,24 @@
 import os
+import sys
+from pathlib import Path
+
+# Add the project root directory to Python path
+project_root = str(Path(__file__).parent.parent.parent)
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
 from datasets import load_dataset
-
-
-datasets = [
-    # basic tasks
-    "asr_commonvoice",
-    "asr_librispeech",
-
-    "dialogue_ser",
-    "emotion_recognition",
-
-    "animal_classification",
-    "sound_classification",
-
-    # instruction tasks
-    "text_multi_instruction_st",
-    "text_multi_instruction_ASR",
-    "speech_multi_instruction_asr",
-    "ifeval",
-
-    # input robustness tasks
-    "librispeech_noise",
-    "librispeech_emotion",
-    "librispeech_speed",
-    "librispeech_multispeaker",
-
-    
-    # QA and reasoning tasks
-    "gsm8k",
-    "alpaca_empathy",
-    "mmlu",
-    "alpaca_eval",
-    "speaker_role",
-    "mmau"
-]
+from src.datasets.base_dataset import TASK_LIST
 
 output_dir = 'local_datasets'
 os.makedirs(output_dir, exist_ok=True)
 
-
-
-for task in datasets:
+for task in TASK_LIST:
     if os.path.exists(os.path.join(output_dir, task)):
         print(f'{task} already exists, skip download')
         continue
-    repo = f'LeMUHaruka/{task}'
+    print(f'Downloading {task} dataset...')
+    repo = f'APEX-SUPERB/{task}'
     dataset = load_dataset(repo, split='test')
 
     dataset.save_to_disk(os.path.join(output_dir, task))

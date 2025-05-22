@@ -3,8 +3,8 @@ from src.models.base_model import BaseModel
 import soundfile as sf
 
 class DeSTA2(BaseModel):
-    def __init__(self, llm_path='/userhome/models/DeSTA2-8B-beta'):
-        self.model = AutoModel.from_pretrained("/userhome/models/DeSTA2-8B-beta", device_map="cuda", trust_remote_code=True)
+    def __init__(self, llm_path='DeSTA-ntu/DeSTA2-8B-beta'):
+        self.model = AutoModel.from_pretrained(llm_path, device_map="cuda", trust_remote_code=True)
 
     def chat_mode(
         self,
@@ -64,7 +64,7 @@ class DeSTA2(BaseModel):
         inputs = self.processor(text=inputs, audios=None, return_tensors="pt", padding=True)
         inputs = inputs.to("cuda")
 
-        generate_ids = self.model.generate(**inputs, max_length=2048)
+        generate_ids = self.model.generate(**inputs, max_length=max_new_tokens)
         generate_ids = generate_ids[:, inputs.input_ids.size(1):]
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]

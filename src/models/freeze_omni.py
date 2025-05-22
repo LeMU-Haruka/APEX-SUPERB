@@ -6,7 +6,7 @@ import math
 import torchaudio.compliance.kaldi as k
 from huggingface_hub import snapshot_download
 
-from src.models.src_freeze_omni.pipeline import inferencePipeline
+from src.models.freeze_omni_modules.pipeline import inferencePipeline
 
 
 class audioEncoderProcessor:
@@ -50,7 +50,7 @@ class audioEncoderProcessor:
 
 
 class FreezeOmni(BaseModel):
-    def __init__(self, llm_path='/userhome/models/Freeze-Omni'):
+    def __init__(self, llm_path='VITA-MLLM/Freeze-Omni'):
         if not os.path.exists(llm_path):
             snapshot_download(
                 repo_id="VITA-MLLM/Freeze-Omni",
@@ -81,7 +81,7 @@ class FreezeOmni(BaseModel):
         self,
         audio,
         sr,
-        max_new_tokens=512,
+        max_new_tokens=1024,
     ):
         wav = torch.tensor(audio)
         # Satge0: preprocess
@@ -139,7 +139,7 @@ class FreezeOmni(BaseModel):
         prompt,
         audio,
         sr,
-        max_new_tokens=512,
+        max_new_tokens=1024,
     ):
         wav = torch.tensor(audio)
         # Satge0: preprocess

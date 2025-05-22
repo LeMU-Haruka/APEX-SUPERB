@@ -42,7 +42,6 @@ asr_eval_prompt = """
 
 
 def wer_metric(preds, targets):
-    # 计算平均wer和cer
     WER = 0.
     CER = 0.
     for p, t in tqdm(zip(preds, targets), total=len(preds), desc="Calculating WER and CER"):
@@ -53,31 +52,18 @@ def wer_metric(preds, targets):
     WER /= len(preds)
     CER /= len(preds)
     print(f"Average WER: {WER:.3f}, Average CER: {CER:.3f}")
-    # 返回dict格式
     return {
         'wer': WER,
         'cer': CER
     }
 
 def normalize_text(text):
-    """小写 + 去标点 + 多空格合并"""
     text = text.lower()
-    text = re.sub(r'[^\w\s]', '', text)  # 去除标点符号
-    text = re.sub(r'\s+', ' ', text).strip()  # 合并多余空格
+    text = re.sub(r'[^\w\s]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
     return text
 
 def calculate_wer(predicted_sentence, ground_truth):
-    """
-    计算单词错误率 (Word Error Rate - WER).
-
-    Args:
-        predicted_sentence (str):  ASR 模型预测的句子.
-        ground_truth (str):  真实的句子 (ground truth).
-
-    Returns:
-        float:  WER 值 (0.0 表示完全正确, 1.0 表示完全错误).
-    """
-
     transform = jiwer.Compose([
         jiwer.RemovePunctuation(),
         jiwer.RemoveMultipleSpaces(),
@@ -90,16 +76,6 @@ def calculate_wer(predicted_sentence, ground_truth):
 
 
 def calculate_cer(predicted_sentence, ground_truth):
-    """
-    计算字符错误率 (Character Error Rate - CER).
-
-    Args:
-        predicted_sentence (str):  ASR 模型预测的句子.
-        ground_truth (str):  真实的句子 (ground truth).
-
-    Returns:
-        float:  CER 值 (0.0 表示完全正确, 1.0 表示完全错误).
-    """
     transform = jiwer.Compose([
         jiwer.RemovePunctuation(),
         jiwer.RemoveMultipleSpaces(),

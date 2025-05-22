@@ -7,7 +7,7 @@ class BaseModel:
             self,
             audio,
             sr,
-            max_new_tokens=2048,
+            max_new_tokens=1024,
     ):
         raise NotImplementedError
 
@@ -17,9 +17,9 @@ class BaseModel:
             instruction,
             audio,
             sr,
-            max_new_tokens=2048,
+            max_new_tokens=1024,
     ):
         raise NotImplementedError
 
-    def text_mode(self, instruction, text, max_new_tokens=2048):
+    def text_mode(self, instruction, text, max_new_tokens=1024):
         raise NotImplementedError

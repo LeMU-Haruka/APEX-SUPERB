@@ -1,5 +1,4 @@
 from transformers import Qwen2AudioForConditionalGeneration, AutoProcessor
-
 from src.models.base_model import BaseModel
 
 
@@ -12,7 +11,7 @@ class Qwen2Audio(BaseModel):
         self,
         audio,
         sr,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         assert sr == 16000
         content = [{"type": "audio", "audio_url": 'audio_url'}]
@@ -35,7 +34,7 @@ class Qwen2Audio(BaseModel):
             prompt,
             audio,
             sr,
-            max_new_tokens=2048,
+            max_new_tokens=1024,
     ):
         conversation = [
             {"role": "user", "content": [
@@ -54,23 +53,3 @@ class Qwen2Audio(BaseModel):
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
         return response
-
-
-    def text_mode(self, prompt, text, max_new_tokens=2048):
-        content = [{"type": "text", "text": text}]
-        conversation = [
-            {"role": "user", "content": content},
-        ]
-        inputs = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
-
-        inputs = self.processor(text=inputs, audios=None, return_tensors="pt", padding=True)
-        inputs = inputs.to("cuda")
-
-        generate_ids = self.model.generate(**inputs, max_length=2048)
-        generate_ids = generate_ids[:, inputs.input_ids.size(1):]
-
-        response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-        return response
-
-
-# debug

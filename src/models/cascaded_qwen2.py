@@ -2,11 +2,10 @@ import torch
 from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq, pipeline, AutoModelForCausalLM, AutoTokenizer
 
 from src.models.base_model import BaseModel
-from src.models.src_salmonn.models.modeling_whisper import WhisperForConditionalGeneration
 
 
 class CascadedQwen2(BaseModel):
-    def __init__(self, llm_path='Qwen/Qwen2-7B-Instruct', whisper_path='/userhome/models/whisper-large-v3'):
+    def __init__(self, llm_path='Qwen/Qwen2-7B-Instruct', whisper_path='openai/whisper-large-v3'):
         self.asr_device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.llm_device = torch.device("cuda:1")
         print(f"ASR device: {self.asr_device}, LLM device: {self.llm_device}")
@@ -48,25 +47,9 @@ class CascadedQwen2(BaseModel):
         result = self.asr_pipe(audio)
         transcription = result["text"]
         return transcription
-        # inputs = self.processor(audio, return_tensors="pt")
-        # input_features = inputs.input_features.to(
-        #     self.asr_device, dtype=self.torch_dtype  # ② 再统一到模型的设备 & dtype
-        # )
-        # generated_ids  = self.asr_model.generate(inputs=input_features)
-        # transcription = self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-        # return transcription
     
 
     def prompt_fomat(self, prompt, question):
-        # prompt_template = """
-        # <s>[INST] <<SYS>>
-        # You are a helpful assistant.
-        # <</SYS>>
-
-        # <PROMPT> 
-        # The question is: <QUESTION>
-        #  [/INST]
-        # """
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "### Task Instruction\n" + prompt + "\n\n### Question\n" + question}
@@ -80,13 +63,9 @@ class CascadedQwen2(BaseModel):
         return model_inputs 
 
     def generate(self, model_inputs):
-        # input_ids = self.tokenizer(prompt, return_tensors="pt").to(self.device)
-        # outputs = self.model.generate(**input_ids, max_new_tokens=200, cache_implementation="static")
-        # response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-        # return response
         generated_ids = self.model.generate(
             model_inputs.input_ids,
-            max_new_tokens=512,
+            max_new_tokens=1024,
             eos_token_id=self.tokenizer.eos_token_id,   # <|eot_id|>
         )
         generated_ids = [
@@ -100,7 +79,7 @@ class CascadedQwen2(BaseModel):
     def chat_mode(
         self,
         audio,
-        max_new_tokens=2048,
+        max_new_tokens=1024,
     ):
         asr_text = self.asr(audio)
         prompt = self.prompt_fomat('', asr_text)
@@ -112,7 +91,7 @@ class CascadedQwen2(BaseModel):
             prompt,
             audio,
             sr,
-            max_new_tokens=2048,
+            max_new_tokens=1024,
     ):
         asr_text = self.asr(audio, sr)
         # prompt = prompt + ' The question is: ' + asr_text + '\nAnswer: '
@@ -121,7 +100,7 @@ class CascadedQwen2(BaseModel):
         return response
 
 
-    def text_mode(self, prompt, text, max_new_tokens=2048):
+    def text_mode(self, prompt, text, max_new_tokens=1024):
         content = [{"type": "text", "text": text}]
         conversation = [
             {"role": "user", "content": content},
@@ -131,7 +110,7 @@ class CascadedQwen2(BaseModel):
         inputs = self.processor(text=inputs, audios=None, return_tensors="pt", padding=True)
         inputs = inputs.to("cuda")
 
-        generate_ids = self.model.generate(**inputs, max_length=2048)
+        generate_ids = self.model.generate(**inputs, max_length=1024)
         generate_ids = generate_ids[:, inputs.input_ids.size(1):]
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]

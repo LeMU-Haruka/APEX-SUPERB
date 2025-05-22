@@ -28,7 +28,7 @@ class Phi4Multimodal(BaseModel):
         prompt,
         audio,
         sr,
-        max_new_tokens=1000,
+        max_new_tokens=1024,
     ):  
         prompt = f'{self.user_prompt}<|audio_1|>{prompt}{self.prompt_suffix}{self.assistant_prompt}'
         print(f'>>> Prompt\n{prompt}')
@@ -46,7 +46,7 @@ class Phi4Multimodal(BaseModel):
         return response
 
 
-    def chat_mode(self, audio, sr, max_new_tokens=1000):
+    def chat_mode(self, audio, sr, max_new_tokens=1024):
         chat = [{'role': 'user', 'content': f'<|audio_1|>'}]
         prompt = self.processor.tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
         if prompt.endswith('<|endoftext|>'):

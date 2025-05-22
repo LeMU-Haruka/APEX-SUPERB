@@ -1,14 +1,16 @@
-
 import os
-from transformers import AutoModel, AutoTokenizer
-from transformers import WhisperFeatureExtractor, AutoTokenizer
 import torch
-from .src_glm.speech_tokenizer.utils import extract_speech_token
-from .src_glm.speech_tokenizer.modeling_whisper import WhisperVQEncoder
+from transformers import AutoModel, AutoTokenizer, WhisperFeatureExtractor
+from .glm_modules.speech_tokenizer.utils import extract_speech_token
+from .glm_modules.speech_tokenizer.modeling_whisper import WhisperVQEncoder
 from src.models.base_model import BaseModel
 
+
 class Glm4Voice(BaseModel):
-    def __init__(self, llm_path='/userhome/models/glm-4-voice-9b'):
+    def __init__(self, llm_path='THUDM/glm-4-voice-9b'):
+        """
+        Please download all the required model and put them in the same local folder.
+        """
         self.glm_model = AutoModel.from_pretrained(
             llm_path,
             trust_remote_code=True,
@@ -22,7 +24,7 @@ class Glm4Voice(BaseModel):
         self.whisper_model = WhisperVQEncoder.from_pretrained(os.path.join(llm_path, "glm-4-voice-tokenizer"), cache_dir='./cache').eval().to("cuda")
 
 
-    def chat_mode(self, audio, sr, max_new_tokens=2048):
+    def chat_mode(self, audio, sr, max_new_tokens=1024):
         audio_tokens = extract_speech_token(
             self.whisper_model, self.feature_extractor, [tuple([torch.from_numpy(audio).unsqueeze(0), sr])]
         )[0]
@@ -43,7 +45,6 @@ class Glm4Voice(BaseModel):
         for item in rtn[0]:
             if item < audio_offset:
                 text_tokens.append(item)
-        # logger.info(text_tokens)
         return self.glm_tokenizer.decode(text_tokens, ignore_special_tokens=False)
     
 
@@ -75,9 +76,7 @@ class Glm4Voice(BaseModel):
         for item in rtn[0]:
             if item < audio_offset:
                 text_tokens.append(item)
-        # logger.info(text_tokens)
         response = self.glm_tokenizer.decode(text_tokens, ignore_special_tokens=False)
-        print(response)
         return response
 
     def generate_text(
@@ -88,7 +87,6 @@ class Glm4Voice(BaseModel):
         history.append({"role": "user", "content": text})
         user_input = text
         system_prompt = "User will provide you with a text instruction. Do it step by step. First, think about the instruction and respond in a interleaved manner, with 13 text token followed by 26 audio tokens."
-        # system_prompt = "User will provide you with a text instruction. Do it step by step. First, think about the instruction and respond in text tokens only."
         inputs = f"<|system|>\n{system_prompt}"
         inputs += f"<|user|>\n{user_input}<|assistant|>streaming_transcription\n"
         inputs = self.glm_tokenizer([inputs], return_tensors="pt")
@@ -99,5 +97,4 @@ class Glm4Voice(BaseModel):
         for item in rtn[0]:
             if item < audio_offset:
                 text_tokens.append(item)
-        # logger.info(text_tokens)
         return self.glm_tokenizer.decode(text_tokens, ignore_special_tokens=False)

@@ -56,8 +56,6 @@ EVALUATOR_MAP = {
     'ifeval': IfevalEvaluator, # ifeval
 }
 
-# 根据上面的EVALUATOR_MAP和后面的注释，按照注释内容映射到指定的evaluator
-
 def load_evaluator(task, model_name, result_file, api, is_align=False):
     if task in ASR_TASKS:
         evaluator = 'asr'

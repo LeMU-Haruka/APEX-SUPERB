@@ -1,9 +1,11 @@
 #!/bin/bash 
 
+# Set task split here
+num_groups=4
 
-# 检查输入参数是否齐全：model, model_path, gpu_id, group_id
+# Check if all input parameters are provided: model, model_path, gpu_id, group_id
 if [ "$#" -ne 4 ]; then
-  echo "Usage: $0 <model> <model_path> <gpu_id> <group_id (0-3)>"
+  echo "Usage: $0 <model> <model_path> <gpu_id> <group_id (0 - num_groups-1)>"
   exit 1
 fi
 
@@ -12,20 +14,16 @@ model_path=$2
 gpu_id=$3
 group=$4
 
-
-num_groups=4
-# 判断 group 参数是否在 0~3 范围内
+# Check if group parameter is within range 0~3
 if ! [[ "$group" =~ ^[0-9]+$ ]] || [ "$group" -ge "$num_groups" ] || [ "$group" -lt 0 ]; then
-  echo "错误：group 参数必须在 0 到 $((num_groups - 1)) 之间"
+  echo "Error: group parameter must be between 0 and $((num_groups - 1))"
   exit 1
 fi
 
-
-
-# 设置 CUDA_VISIBLE_DEVICES 环境变量，确保脚本只使用指定的 GPU
+# Set CUDA_VISIBLE_DEVICES environment variable to ensure the script only uses the specified GPU
 export CUDA_VISIBLE_DEVICES=$gpu_id
 
-# 定义你要遍历的 task 列表
+# Define the list of tasks to iterate through
 tasks=(
     # basic tasks
     "asr_commonvoice"
@@ -65,11 +63,9 @@ tasks=(
 
 total=${#tasks[@]}
 
-
-# 计算每组的基本大小和余数，以实现尽可能均衡的拆分
+# Calculate base size and remainder for each group to achieve balanced distribution
 base=$(( total / num_groups ))
 rem=$(( total % num_groups ))
-
 
 if [ "$group" -lt "$rem" ]; then
   group_size=$(( base + 1 ))
@@ -81,21 +77,20 @@ fi
 
 end_index=$(( start_index + group_size ))
 
-echo "总任务数：$total"
-echo "将任务拆分为 $num_groups 组"
-echo "当前选取组号：$group, 任务索引范围：[$start_index, $end_index)"
-echo "本组任务数量：$group_size"
-
+echo "Total number of tasks: $total"
+echo "Tasks divided into $num_groups groups"
+echo "Current group number: $group, Task index range: [$start_index, $end_index)"
+echo "Number of tasks in this group: $group_size"
 
 start_time=$(date +%s)
 
-# 遍历任务
+# Iterate through tasks
 success_tasks=()
 failed_tasks=()
 
 for (( i = start_index; i < end_index; i++ )); do
   task=${tasks[$i]}
-  echo "【运行】任务：$task 在 GPU $gpu_id 上"
+  echo "【Running】Task: $task on GPU $gpu_id"
   if python generate.py --model "$model" --model_path "$model_path" --task "$task"; then
     success_tasks+=("$task")
   else
@@ -106,7 +101,7 @@ done
 end_time=$(date +%s)
 elapsed_time=$((end_time - start_time))
 
-# 输出用时信息
+# Output time information
 echo "All Done!"
 echo "Succeeded tasks: ${success_tasks[*]}"
 echo "Failed tasks: ${failed_tasks[*]}"

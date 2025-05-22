@@ -55,7 +55,7 @@ class AccuracyEvaluator(Evaluator):
         else:
             for item in tqdm(data, total=len(data)):
                 if self.is_align:
-                    pred = self.align_text(item)
+                    pred = self.extract_answer(item)
                     item['aligned_text'] = pred
                 else:
                     pred = item['pred']

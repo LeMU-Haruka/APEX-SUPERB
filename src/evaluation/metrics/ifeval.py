@@ -6,6 +6,7 @@ from src.evaluation.metrics.gpt_eval import build_content_score_prompt
 from utils import extract_json
 
 CACHE_DIR = 'cache'
+
 IFEVAL_PROMPT = """
     You are an evaluator for instruction-following tasks in LLMs.
     Given a question, an instruction, and a response, evaluate according to the following rules:

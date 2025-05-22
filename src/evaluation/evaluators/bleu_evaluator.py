@@ -8,7 +8,7 @@ from src.evaluation.evaluators.evaluator import Evaluator
 from src.evaluation.metrics.bleu import blue_metric
 
 
-BLUE_ALIGNMENT_PROMPT = """
+BLEU_EXTRACT_PROMPT = """
             # Task
             Clean the model's predicted German translation (`pred` field). **Your final output must be only the cleaned text string, containing no other characters or explanation.**
             
@@ -66,7 +66,7 @@ class BleuEvaluator(Evaluator):
         self.is_align = is_align
         self.cache_file = []
         self.metric = blue_metric
-        self.align_prompt = BLUE_ALIGNMENT_PROMPT
+        self.align_prompt = BLEU_EXTRACT_PROMPT
 
 
     def evaluate(self, data):
@@ -75,7 +75,7 @@ class BleuEvaluator(Evaluator):
         targets = []
         for item in tqdm(data, total=len(data)):
             if self.is_align:
-                pred = self.align_text(item)
+                pred = self.extract_answer(item)
                 item['aligned_text'] = pred
             else:
                 pred = item['pred']
