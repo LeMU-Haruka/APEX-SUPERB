@@ -7,14 +7,13 @@ This guide explains how to integrate your own models into the APEX-SUPERB framew
 All models in APEX-SUPERB inherit from the `BaseModel` class, which defines three core interaction modes:
 
 1. `chat_mode`: For open-ended conversations with audio input
-2. `prompt_mode`: For task-specific interactions with audio input and instructions
-3. `text_mode`: For text-only interactions
+2. `prompt_mode`: For task-specific interactions with audio input and text task instructions
 
 ## Steps to Add Your Model
 
 ### 1. Create a New Model File
 
-Create a new Python file in the `src/models` directory with your model name (e.g., `my_model.py`).
+Create a new Python file in the `src/models` directory with your model name (e.g., `mymodel.py`).
 
 ### 2. Implement the Base Interface
 
@@ -30,16 +29,32 @@ class MyModel(BaseModel):
         # Load your model and other necessary components
         
     def chat_mode(self, audio, sr, max_new_tokens=2048):
-        # Implement open-ended conversation with audio input
-        # audio: audio waveform
-        # sr: sampling rate (usually 16000)
+        """
+        Chat Mode: Generate responses based solely on audio input.
+
+        Args:
+            audio (np.ndarray or torch.Tensor): The input audio waveform.
+            sr (int): Sampling rate of the audio (typically 16000).
+            max_new_tokens (int): Maximum number of tokens to generate. Default is 2048.
+
+        Returns:
+            response (str): The generated conversational response.
+        """
         return response
         
     def prompt_mode(self, instruction, audio, sr, max_new_tokens=1024):
-        # Implement task-specific interaction
-        # instruction: task-specific prompt
-        # audio: audio waveform
-        # sr: sampling rate
+        """
+        Prompt Mode: Perform task-specific interaction based on both text task instruction and audio input.
+
+        Args:
+            instruction (str): A textual instruction guiding the model's behavior.
+            audio (np.ndarray or torch.Tensor): The input audio waveform.
+            sr (int): Sampling rate of the audio.
+            max_new_tokens (int): Maximum number of tokens to generate. Default is 1024.
+
+        Returns:
+            response (str): The generated response based on the instruction and audio input.
+        """
         return response
 ```
 
@@ -48,31 +63,13 @@ class MyModel(BaseModel):
 Add your model to `src/models/__init__.py`:
 
 ```python
-from .my_model import MyModel
+from src.models.mymodel import MyModel
 
-__all__ = [
+models_map = {
     ...,
-    "MyModel",
-]
+    "my_model": MyModel,
+}
 ```
-
-## Implementation Guidelines
-
-1. **Audio Processing**:
-   - Input audio is typically provided as a waveform with a 16kHz sampling rate
-   - Consider implementing audio preprocessing if your model requires specific formats
-
-2. **Device Management**:
-   - Always handle GPU/CPU device placement appropriately
-   - Use `torch.device("cuda" if torch.cuda.is_available() else "cpu")`
-
-3. **Memory Efficiency**:
-   - Consider implementing memory-efficient techniques for large models
-   - Use `torch.cuda.empty_cache()` when appropriate
-
-4. **Error Handling**:
-   - Implement proper error handling for audio processing and model inference
-   - Validate input formats and parameters
 
 ## Example Implementation
 
@@ -114,23 +111,8 @@ python generate.py --model my_model --model_path /path/to/model --task asr
 
 2. Verify results with the evaluation script:
 ```shell
-python evaluate.py --model my_model --result_path results/my_model_results --task asr
+python evaluate.py --model my_model --result_path results/my_model_results
 ```
-
-## Common Issues and Solutions
-
-1. **Memory Management**:
-   - If encountering OOM errors, consider implementing gradient checkpointing or model sharding
-   - Use `torch.cuda.empty_cache()` between heavy operations
-
-2. **Speed Optimization**:
-   - Consider implementing batched processing if applicable
-   - Use `@torch.no_grad()` for inference
-   - Implement caching mechanisms if appropriate
-
-3. **Input Validation**:
-   - Always validate audio sampling rate (should be 16kHz)
-   - Check audio duration and implement chunking if necessary
 
 ## Support
 
