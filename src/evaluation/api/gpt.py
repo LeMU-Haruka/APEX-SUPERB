@@ -36,6 +36,7 @@ class GPTClient(Evaluator):
         completion = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=message,
+            response_format={"type": "json_object"},
             max_tokens=500, 
             temperature=0.5,
             top_p=0.9, 

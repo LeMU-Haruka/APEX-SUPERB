@@ -33,6 +33,7 @@ class VllmClient:
         completion = self.client.chat.completions.create(
             model="/userhome/models/llama-2-7b-chat-hf",  # 改为正式模型名 "gpt-4"
             # model='/userhome/models/Llama-3.1-8B-Instruct',
+            # response_format={"type": "json_object"},
             messages=messages,
             max_tokens=500, 
             temperature=0.5, 

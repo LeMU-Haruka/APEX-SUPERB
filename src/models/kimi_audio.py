@@ -51,3 +51,20 @@ class Kimi(BaseModel):
         with torch.no_grad():
             _, response = self.model.generate(messages, **self.sampling_params, output_type="text")
         return response
+    
+    def process(self, item, task):
+        audio = item['audio']
+        sr = item['sr']
+        prompt = item['instruction']
+        if task == 'speech_instruct_asr':
+            pred = self.chat_mode(audio, sr)
+        else:
+            pred = self.prompt_mode(prompt, audio, sr)
+        return {
+            'file': item['file'],
+            'prompt': prompt,
+            'question': item['text'],
+            'pred': pred,
+            'target': item['label'],
+            'kargs': item['kargs'],
+        }

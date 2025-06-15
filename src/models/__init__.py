@@ -8,9 +8,11 @@ from src.models.freeze_omni import FreezeOmni
 from src.models.gemini import GeminiAudio
 from src.models.glm4voice import Glm4Voice
 from src.models.gpt4o import GPT4oAudio
-from src.models.kimi_audio import Kimi
+# from src.models.kimi_audio import Kimi
+from src.models.llama3 import LLaMA3Model
 from src.models.qwen2 import Qwen2Audio
 # from src.models.qwen25_omni import Qwen25Omni
+from src.models.qwen3 import Qwen3Model
 from src.models.salmonn import SALMONN
 from src.models.phi4 import Phi4Multimodal
 from src.models.ultravox import Ultralvox
@@ -18,6 +20,11 @@ from src.models.whisper import Whisper
 
 
 models_map = {
+    # Text models
+    'llama3': LLaMA3Model, # https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct
+    'qwen3': Qwen3Model, # https://huggingface.co/Qwen/Qwen3-8B
+
+    # Cascaded models
     'whisper': Whisper,
     'cascaded_llama3': CascadedLlama3,
     'cascaded_qwen2': CascadedQwen2,
@@ -36,6 +43,6 @@ models_map = {
     'desta2': DeSTA2, # https://huggingface.co/DeSTA-ntu/DeSTA2-8B-beta
     # 'audio-flamingo': AudioFlamingo2, will cause init very slow 
     'ultravox': Ultralvox, # https://huggingface.co/fixie-ai/ultravox-v0_5-llama-3_1-8b
-    'kimi_audio': Kimi, # https://huggingface.co/moonshotai/Kimi-Audio-7B-Instruct
+    # 'kimi_audio': Kimi, # https://huggingface.co/moonshotai/Kimi-Audio-7B-Instruct
     'aero-audio': AeroAudio, # https://huggingface.co/lmms-lab/Aero-1-Audio
 }

@@ -53,3 +53,20 @@ class Qwen2Audio(BaseModel):
 
         response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
         return response
+    
+    def process(self, item, task):
+        audio = item['audio']
+        sr = item['sr']
+        prompt = item['instruction']
+        if task == 'speech_instruct_asr':
+            pred = self.chat_mode(audio, sr)
+        else:
+            pred = self.prompt_mode(prompt, audio, sr)
+        return {
+            'file': item['file'],
+            'prompt': prompt,
+            'question': item['text'],
+            'pred': pred,
+            'target': item['label'],
+            'kargs': item['kargs'],
+        }

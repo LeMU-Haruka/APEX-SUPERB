@@ -23,3 +23,7 @@ class BaseModel:
 
     def text_mode(self, instruction, text, max_new_tokens=1024):
         raise NotImplementedError
+
+
+    def process(self, item, task):
+        raise NotImplementedError

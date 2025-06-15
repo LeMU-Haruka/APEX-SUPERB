@@ -39,7 +39,11 @@ TASK_LIST = [
     "mmlu",
     "alpaca_eval",
     "speaker_role",
-    "mmau"
+    "mmau",
+
+    # dev 
+    'gsm8k_v1',
+    'advbench_v1'
 ]
 
 def create_few_shot_prompt(task):

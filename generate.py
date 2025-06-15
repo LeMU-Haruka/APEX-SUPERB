@@ -1,6 +1,5 @@
 import os
 from argparse import ArgumentParser
-import torch
 
 # from src.datasets import datasets_map
 from src.datasets.base_dataset import HFDataset
@@ -44,21 +43,8 @@ def main():
 
     results = []
     for item in tqdm(data, total=len(data)):
-        audio = item['audio']
-        prompt = item['instruction']
-        sr = item['sr']
-        if task == 'speech_instruct_asr':
-            pred = model.chat_mode(audio, sr)
-        else:
-            pred = model.prompt_mode(prompt, audio, sr)
-        results.append({
-            'file': item['file'],
-            'prompt': prompt,
-            'question': item['text'],
-            'pred': pred,
-            'target': item['label'],
-            'kargs': item['kargs'],
-        })
+        result = model.process(item, task)
+        results.append(result)
 
     task = results[0]['kargs']['task']
     # save results
