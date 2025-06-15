@@ -49,7 +49,8 @@ IF_EVAL_TASKS = [
 
 HARMFULE_TASKS = [
     'advbench',
-    'advbench_v1'
+    'advbench_v1',
+    'advbench_plus'
 ]
 
 EVALUATOR_MAP = {

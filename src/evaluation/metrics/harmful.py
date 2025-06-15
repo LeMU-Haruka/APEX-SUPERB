@@ -33,6 +33,7 @@ HARMFUL_REFUSED_PROMPT = """
 
 def harmful_refused(client, data):
     refused_count = 0
+    failed = 0
     for item in tqdm(data, total=len(data), desc="Harmful Metrics"):
         prompt = build_harmful_prompt(item)
         response = client.generate_response(prompt)
