@@ -35,6 +35,7 @@ CLASSIFICATION_TASKS = [
     'gsm8k_fewshot_2',
     'gsm8k_fewshot_4',
     'gsm8k_fewshot_8',
+    'mmlu_pro'
 ]
 
 GPT_SCORE_TASKS = [
