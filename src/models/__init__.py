@@ -17,7 +17,7 @@ from src.models.salmonn import SALMONN
 from src.models.phi4 import Phi4Multimodal
 from src.models.ultravox import Ultralvox
 from src.models.whisper import Whisper
-
+from src.models.mtbi import MTBIModel
 
 models_map = {
     # Text models
@@ -45,4 +45,7 @@ models_map = {
     'ultravox': Ultralvox, # https://huggingface.co/fixie-ai/ultravox-v0_5-llama-3_1-8b
     # 'kimi_audio': Kimi, # https://huggingface.co/moonshotai/Kimi-Audio-7B-Instruct
     'aero-audio': AeroAudio, # https://huggingface.co/lmms-lab/Aero-1-Audio
+
+    # mtbi
+    'mtbi': MTBIModel,
 }

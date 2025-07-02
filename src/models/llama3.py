@@ -34,8 +34,11 @@ class LLaMA3Model:
     def process(self, item, task):
         # instruction = item['instruction']
         # text = item['text']
-        instruction = 'You are a helpful assistant. Please help to solve the following question.'
-        text = item['question']
+        if 'instruction' in item:
+            instruction = item['instruction']
+        else:
+            instruction = 'You are a helpful assistant. Please help to solve the following question.'
+        text = item['text']
         pred = self.text_mode(instruction, text)
         item['kargs'] = {}
         item['kargs']['task'] = task
@@ -44,6 +47,6 @@ class LLaMA3Model:
             'prompt': instruction,
             'question': text,
             'pred': pred,
-            'target': item['answer'],
+            'target': item['label'],
             'kargs': item['kargs'],
         }

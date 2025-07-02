@@ -1,10 +1,9 @@
-from transformers import Qwen2AudioForConditionalGeneration, AutoProcessor
 from src.models.base_model import BaseModel
 from src.models.mtbi_modules.mtbi_model import MTBI
 from src.models.mtbi_modules.utils import load_config
 
 
-class Qwen2Audio(BaseModel):
+class MTBIModel(BaseModel):
     def __init__(self, llm_path='Qwen/Qwen2-Audio-7B-Instruct'):
         
         config = 'config/data_config.yaml'
