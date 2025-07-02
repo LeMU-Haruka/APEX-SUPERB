@@ -47,15 +47,16 @@ class Qwen3Model(BaseModel):
         return response
 
 
-    def build_messages(self, instruction, text):
+    def build_messages(self, instruction, text, is_think=True):
         messages = [
             {"role": "user", "content": instruction + " " + text},
         ]
+        # print(f'Think mode is {is_think}')
         text = self.tokenizer.apply_chat_template(
             messages,
             tokenize=False,
             add_generation_prompt=True,
-            enable_thinking=True # Switches between thinking and non-thinking modes. Default is True.
+            enable_thinking=is_think # Switches between thinking and non-thinking modes. Default is True.
         )
         model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
         return model_inputs 

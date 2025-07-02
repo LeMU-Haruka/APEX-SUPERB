@@ -43,7 +43,10 @@ TASK_LIST = [
 
     # dev 
     'gsm8k_v1',
-    'advbench_v1'
+    'advbench_v1',
+    'advbench',
+    'text_instruction_asr_v1',
+    'text_instruction_qa'
 ]
 
 def create_few_shot_prompt(task):

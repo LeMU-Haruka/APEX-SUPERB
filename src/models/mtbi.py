@@ -1,11 +1,22 @@
 from transformers import Qwen2AudioForConditionalGeneration, AutoProcessor
 from src.models.base_model import BaseModel
+from src.models.mtbi_modules.mtbi_model import MTBI
+from src.models.mtbi_modules.utils import load_config
 
 
 class Qwen2Audio(BaseModel):
     def __init__(self, llm_path='Qwen/Qwen2-Audio-7B-Instruct'):
-        self.processor = AutoProcessor.from_pretrained(llm_path, cache_dir='./cache')
-        self.model = Qwen2AudioForConditionalGeneration.from_pretrained(llm_path, device_map="cuda", cache_dir='./cache', torch_dtype='auto')
+        
+        config = 'config/data_config.yaml'
+        config = load_config(config)
+
+        self.model = MTBI.load_from_checkpoint(
+            llm_path,
+            llama_hidden_size=config.llama_hidden_size,
+            speech_model_path=config.speech_model_path,
+            llama_ckpt=config.llama_path
+        )
+
 
     def chat_mode(
         self,
@@ -14,6 +25,7 @@ class Qwen2Audio(BaseModel):
         max_new_tokens=1024,
     ):
         assert sr == 16000
+        response = self.model.generate(audio, max_new_tokens=max_new_tokens)
         content = [{"type": "audio", "audio_url": 'audio_url'}]
         conversation = [
             {"role": "user", "content": content},
