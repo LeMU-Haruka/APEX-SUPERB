@@ -11,11 +11,21 @@ class Evaluator:
         pred = item['pred']
         prompt = self.align_prompt.replace("[INPUT]", pred)
         response = self.client.generate_response(prompt)
+        try:
+            json_response = json.loads(response)
+            aligned_text = json_response['aligned_text']
+        except BaseException as e:
+            print("Response format error")
+            print(e)
+            print(response)
+            print('#' * 20)
+            aligned_text = pred
+        
         self.cache_file.append({
             'pred': pred,
-            'aligned_pred': response
+            'aligned_pred': aligned_text
         })
-        return response
+        return aligned_text
     
 
     def save_cache(self, data):

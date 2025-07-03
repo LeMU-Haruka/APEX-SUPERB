@@ -33,12 +33,15 @@ ANSWER_EXTRACT_PROMPT = """
     yesterday you were trembling for a health that is dear to you today you fear for your own tomorrow it will be anxiety about money the day after tomorrow the diatribe of a slanderer  
     -------------------------------------------------  
 
-    Now clean the following text.  
+    Now clean the following text.  Response in json format, with the key "aligned_text" and the cleaned text as the value.
     -------------------------------------------------  
     [INPUT]  
     -------------------------------------------------  
 
     (The output should consist **only** of the cleaned transcript.)
+    {
+        "aligned_text": ""
+    }
 """
 
 class ASREvaluator(Evaluator):
