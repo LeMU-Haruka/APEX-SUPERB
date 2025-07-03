@@ -333,7 +333,7 @@ class MTBI(pl.LightningModule):
         return clean_results
 
 
-    def generate(self, audio: list, prompt: str = None, new_max_tokens: int = 200):
+    def generate(self, audio: list, prompt: str = None, max_new_tokens: int = 200):
         """
         [修正后]
         根据音频输入生成文本，确保输入格式与训练过程完全一致。
@@ -401,7 +401,7 @@ class MTBI(pl.LightningModule):
             outputs = self.llama_model.generate(
                 inputs_embeds=inputs_embeds,
                 attention_mask=attention_mask_for_generation,
-                max_new_tokens=200,
+                max_new_tokens=max_new_tokens,
                 eos_token_id=terminators,
                 do_sample=True,
                 top_p=0.8,
