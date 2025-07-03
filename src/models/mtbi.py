@@ -25,19 +25,7 @@ class MTBIModel(BaseModel):
     ):
         assert sr == 16000
         response = self.model.generate(audio, max_new_tokens=max_new_tokens)
-        content = [{"type": "audio", "audio_url": 'audio_url'}]
-        conversation = [
-            {"role": "user", "content": content},
-        ]
-        inputs = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
-        audios = [audio]
-        inputs = self.processor(text=inputs, audios=audios, return_tensors="pt", padding=True)
-        inputs = inputs.to("cuda")
-
-        generate_ids = self.model.generate(**inputs, max_length=max_new_tokens)
-        generate_ids = generate_ids[:, inputs.input_ids.size(1):]
-
-        response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+        print(response)
         return response
 
     def prompt_mode(
@@ -47,20 +35,6 @@ class MTBIModel(BaseModel):
             sr,
             max_new_tokens=1024,
     ):
-        conversation = [
-            {"role": "user", "content": [
-                {"type": "audio", "audio_url": ""},
-                {"type": "text", "text": prompt},
-            ]}
-        ]
-        audios = [audio]
-        inputs = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
-
-        inputs = self.processor(text=inputs, audios=audios, return_tensors="pt", padding=True)
-        inputs = inputs.to(self.model.device)
-
-        generate_ids = self.model.generate(**inputs, max_length=max_new_tokens)
-        generate_ids = generate_ids[:, inputs.input_ids.size(1):]
-
-        response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+        response = self.model.generate(audio, prompt=prompt, max_new_tokens=max_new_tokens)
+        print(response)
         return response
