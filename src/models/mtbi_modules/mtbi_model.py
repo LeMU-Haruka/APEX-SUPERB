@@ -351,7 +351,7 @@ class MTBI(pl.LightningModule):
         )
         audio_input, audio_atts, _, _, _ = self.speech_connector(audio_hidden_states, attention_mask)
         batch_size = audio_input.shape[0]
-
+        audio_input = audio_input.to(self.llama_model.dtype)
 
         # ===================================================================
         # 2. Prompt 构建 (与训练时完全一样)
