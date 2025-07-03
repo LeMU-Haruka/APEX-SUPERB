@@ -7,7 +7,7 @@ import torch
 from torch import nn
 
 
-def load_config(config_path='config/data_config.yaml'):
+def load_config(config_path='src/models/mtbi_modules/config/data_config.yaml'):
     with open(config_path, 'r', encoding='utf-8') as f:
         config_dict = yaml.safe_load(f)
     

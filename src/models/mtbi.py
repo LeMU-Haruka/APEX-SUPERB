@@ -6,7 +6,7 @@ from src.models.mtbi_modules.utils import load_config
 class MTBIModel(BaseModel):
     def __init__(self, llm_path='Qwen/Qwen2-Audio-7B-Instruct'):
         
-        config = 'config/data_config.yaml'
+        config = 'src/models/mtbi_modules/config/data_config.yaml'
         config = load_config(config)
 
         self.model = MTBI.load_from_checkpoint(
