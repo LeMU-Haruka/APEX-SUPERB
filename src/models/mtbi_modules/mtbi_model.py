@@ -415,8 +415,8 @@ class MTBI(pl.LightningModule):
         # 5. 解码和后处理
         # ===================================================================
         # 从生成结果中去除输入 prompt 的部分
-        output_tokens = outputs[:, inputs_embeds.shape[1]:]
-        raw_outputs = self.llama_tokenizer.batch_decode(output_tokens, skip_special_tokens=True)
+        # output_tokens = outputs[:, inputs_embeds.shape[1]:]
+        raw_outputs = self.llama_tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
         # 只需要去除可能的前导空格即可
         clean_results = [s.lstrip() for s in raw_outputs]
