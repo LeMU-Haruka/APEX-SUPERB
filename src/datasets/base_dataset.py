@@ -23,7 +23,7 @@ TASK_LIST = [
     # instruction tasks
     "text_multi_instruction_st",
     "text_multi_instruction_ASR",
-    "speech_multi_instruction_asr",
+    "speech_multi_instruction_asr",  
     "ifeval",
 
     # input robustness tasks
