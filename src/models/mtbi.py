@@ -74,6 +74,7 @@ class MTBIModel(BaseModel):
             eos_token_id=self.model.llama_tokenizer.eos_token_id,
         )
         response = self.model.llama_tokenizer.decode(out_ids[0][prompt.shape[-1]:], skip_special_tokens=True)
+        
         return response
 
 
@@ -84,5 +85,6 @@ class MTBIModel(BaseModel):
             text = self.asr(item['audio'], item['sr'])
             print(f"Transcribed text: {text}")
             response = self.text_mode(item['instruction'], text)
-
+        print(f"Response: {response}")
+        print(f"Label: {item['label']}")
         return response
