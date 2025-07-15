@@ -49,11 +49,17 @@ class MTBIModel(BaseModel):
     
 
     def build_messages(self, instruction, text):
+        if isinstance(instruction, list):
+            assert len(instruction) == 1
+            instruction = instruction[0]
+        if isinstance(text, list):
+            assert len(text) == 1
+            text = text[0]
         messages = [
             {"role": "system",
             "content": "You are a helpful assistant."},
             {"role": "user",
-            "content": instruction + '' + text},
+            "content": instruction + ' ' + text},
         ]
         prompt_ids = self.model.llama_tokenizer.apply_chat_template(
             messages, add_generation_prompt=True, return_tensors="pt"
@@ -76,6 +82,7 @@ class MTBIModel(BaseModel):
             response = self.asr(item['audio'], item['sr'])
         else:
             text = self.asr(item['audio'], item['sr'])
+            print(f"Transcribed text: {text}")
             response = self.text_mode(item['instruction'], text)
 
         return response
