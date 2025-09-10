@@ -15,7 +15,7 @@ class SALMONN(BaseModel):
     We use the vicuna 13b-v1.1 model as the LLM
     """
     def __init__(self, llm_path='tsinghua-ee/SALMONN'):
-        config_path = 'src/models/src_salmonn/configs/decode_config.yaml'
+        config_path = 'src/models/salmonn_modules/configs/decode_config.yaml'
         self.cfg = Config(config_path)
 
         self.update_config(llm_path)       
