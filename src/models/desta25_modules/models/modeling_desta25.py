@@ -452,7 +452,7 @@ class DeSTA25AudioModel(PreTrainedModel):
         assert len(self.tokenizer.tokenize(self.placeholder_token)) == 1, "placeholder_token must be a single token in the tokenizer"
 
         # VAD
-        self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad')
+        self.vad_model, utils = torch.hub.load(repo_or_dir='/userhome/code/silero-vad', model='silero_vad', source='local')
         (self.get_speech_timestamps, _, _, _, _) = utils
 
 

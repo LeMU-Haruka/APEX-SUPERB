@@ -1,8 +1,10 @@
+import time
+import uuid
 from transformers import AutoModel
 from src.models.base_model import BaseModel
 import soundfile as sf
 from src.models.desta25_modules import DeSTA25AudioModel
-
+from pathlib import Path
 
 class DeSTA25(BaseModel):
     def __init__(self, llm_path='DeSTA-ntu/DeSTA2.5-Audio-Llama-3.1-8B'):
@@ -17,7 +19,8 @@ class DeSTA25(BaseModel):
         max_new_tokens=1024,
     ):
         assert sr == 16000
-        cache_audio = 'cache/desta2_temp.wav'
+        uuid_str = str(uuid.uuid4())
+        cache_audio = f'cache/desta25_{uuid_str}.wav'
         sf.write(cache_audio, audio, sr)
         messages = [
             {
@@ -44,6 +47,8 @@ class DeSTA25(BaseModel):
         response = outputs.text
         if isinstance(response, list) and len(response) > 0:
             response = response[0]
+        # delete temp file
+        Path(cache_audio).unlink(missing_ok=True)
         return response
 
     def prompt_mode(
@@ -53,7 +58,8 @@ class DeSTA25(BaseModel):
             sr,
             max_new_tokens=1024,
     ):
-        cache_audio = 'cache/desta2_temp.wav'
+        uuid_str = str(uuid.uuid4())
+        cache_audio = f'cache/desta25_{uuid_str}.wav'
         sf.write(cache_audio, audio, sr)
         # Run inference with audio input
         messages = [
@@ -81,6 +87,8 @@ class DeSTA25(BaseModel):
         response = outputs.text
         if isinstance(response, list) and len(response) > 0:
             response = response[0]
+        # delete temp file
+        Path(cache_audio).unlink(missing_ok=True)
         return response
 
 

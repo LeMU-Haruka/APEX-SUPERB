@@ -37,7 +37,7 @@ class Ultralvox(BaseModel):
             },
             {
                 "role": "user",
-                "content": prompt
+                "content": prompt + ' <|audio|>'
             },
         ]
         response = self.pipe({'audio': audio, 'turns': turns, 'sampling_rate': sr}, max_new_tokens=max_new_tokens)
