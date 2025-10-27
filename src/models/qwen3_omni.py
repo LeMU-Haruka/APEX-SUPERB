@@ -1,17 +1,15 @@
-from transformers import Qwen2_5OmniForConditionalGeneration, Qwen2_5OmniProcessor
+from transformers import Qwen3OmniMoeForConditionalGeneration, Qwen3OmniMoeProcessor
 from qwen_omni_utils import process_mm_info
 from src.models.base_model import BaseModel
-import torch
 
-
-class Qwen25Omni(BaseModel):
-    def __init__(self, llm_path='Qwen/Qwen2.5-Omni-7B'):
-        self.processor = Qwen2_5OmniProcessor.from_pretrained(llm_path)
-        self.model = Qwen2_5OmniForConditionalGeneration.from_pretrained(
+class Qwen3Omni(BaseModel):
+    def __init__(self, llm_path='Qwen/Qwen3-Omni-30B-A3B-Instruct'):
+        self.processor = Qwen3OmniMoeProcessor.from_pretrained(llm_path)
+        self.model = Qwen3OmniMoeForConditionalGeneration.from_pretrained(
             llm_path, 
-            torch_dtype=torch.bfloat16,
+            dtype="auto",
             device_map="auto",
-            # attn_implementation="flash_attention_2",
+            attn_implementation="flash_attention_2",
         )
         self.model.to("cuda")
 
@@ -30,18 +28,18 @@ class Qwen25Omni(BaseModel):
         text = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
         audios, images, videos = process_mm_info(conversation, use_audio_in_video=False)
 
-        inputs = self.processor(text=text, audios=audios, images=images, videos=videos, return_tensors="pt", padding=True, use_audio_in_video=False)
+        inputs = self.processor(text=text, audio=audios, images=images, videos=videos, return_tensors="pt", padding=True, use_audio_in_video=False)
         inputs = inputs.to(self.model.device).to(self.model.dtype)
 
-        generate_ids = self.model.generate(**inputs, 
-                                           max_length=max_new_tokens, 
-                                           return_audio=False,
-                                           eos_token_id=self.processor.tokenizer.eos_token_id,
-                                           temperature=0.01
-                                           )
-        generate_ids = generate_ids[:, inputs.input_ids.size(1):]
-
-        response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+        text_ids, audio = self.model.generate(**inputs, 
+                                 speaker="Ethan", 
+                                 thinker_return_dict_in_generate=True,
+                                 use_audio_in_video=False)
+        
+        response = self.processor.batch_decode(text_ids.sequences[:, inputs["input_ids"].shape[1] :],
+                              skip_special_tokens=True,
+                              clean_up_tokenization_spaces=False)
+        print(response)
         return response
 
     def prompt_mode(
@@ -64,10 +62,18 @@ class Qwen25Omni(BaseModel):
         inputs = self.processor(text=text, audio=audios, images=images, videos=videos, return_tensors="pt", padding=True, use_audio_in_video=False)
         inputs = inputs.to(self.model.device).to(self.model.dtype)
 
-        generate_ids = self.model.generate(**inputs, max_length=max_new_tokens, return_audio=False)
-        generate_ids = generate_ids[:, inputs.input_ids.size(1):]
+        text_ids, audio = self.model.generate(**inputs, 
+                                 speaker="Ethan", 
+                                 thinker_return_dict_in_generate=True,
+                                 use_audio_in_video=False)
+        # generate_ids = generate_ids[:, inputs.input_ids.size(1):]
 
-        response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+        # response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+
+        response = self.processor.batch_decode(text_ids.sequences[:, inputs["input_ids"].shape[1] :],
+                              skip_special_tokens=True,
+                              clean_up_tokenization_spaces=False)
+        print(response)
         return response
     
     def process(self, item, task):

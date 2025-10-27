@@ -42,8 +42,8 @@ model:
 
   multi_prompt: True
   prompt_template: "USER: {}\nASSISTANT:"
-  prompt_path: "src/models/src_salmonn/prompts/train_prompt.json"
-  test_prompt_path: "src/models/src_salmonn/prompts/test_prompt.json"
+  prompt_path: "src/models/salmonn_modules/prompts/train_prompt.json"
+  test_prompt_path: "src/models/salmonn_modules/prompts/test_prompt.json"
   max_txt_len: 300
   end_sym: "</s>"
 
