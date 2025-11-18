@@ -4,7 +4,15 @@ from src.evaluation.evaluators.asr_evaluator import ASREvaluator
 from src.evaluation.evaluators.bleu_evaluator import BleuEvaluator
 from src.evaluation.evaluators.gpt_score_evaluator import GPTScoreEvaluator
 from src.evaluation.evaluators.ifeval_evaluator import IfevalEvaluator
+from src.evaluation.evaluators.instruction_robustness_evaluator import InstructionRobustnessEvaluator
 
+
+INSTRUCTION_ROBUSTNESS_TASKS = [
+    'instruction_robustness_asr',
+    'instruction_robustness_asr_s',
+    'text_instruct_asr',
+    'speech_instruct_asr',
+]
 
 ASR_TASKS = [
     'asr_librispeech',
@@ -13,8 +21,8 @@ ASR_TASKS = [
     'librispeech_emotion',
     'librispeech_speed',
     'librispeech_multispeaker',
-    'text_instruct_asr',
-    'speech_instruct_asr'
+
+    'librispeech_samespeaker'
 ]
 
 ST_TASKS = [
@@ -44,7 +52,9 @@ GPT_SCORE_TASKS = [
 ]
 
 IF_EVAL_TASKS = [
-    'ifeval'
+    'ifeval',
+    'ifeval_v1',
+    'ifeval_v1_s'
 ]
 
 
@@ -61,6 +71,7 @@ EVALUATOR_MAP = {
     'score': GPTScoreEvaluator, # alpaca_empathy, 
     'ifeval': IfevalEvaluator, # ifeval,
     'harmful': HarmfulEvaluator,
+    'instruction_robustness': InstructionRobustnessEvaluator, # instruction_robustness_asr
 }
 
 # 根据上面的EVALUATOR_MAP和后面的注释，按照注释内容映射到指定的evaluator
@@ -78,5 +89,7 @@ def load_evaluator(task, model_name, result_file, api, is_align=False):
         evaluator = 'ifeval'
     elif task in HARMFULE_TASKS:
         evaluator = 'harmful'
+    elif task in INSTRUCTION_ROBUSTNESS_TASKS:
+        evaluator = 'instruction_robustness'
     evaluator = EVALUATOR_MAP[evaluator](model_name, result_file, task, api, is_align)
     return evaluator

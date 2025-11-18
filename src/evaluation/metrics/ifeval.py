@@ -1,4 +1,5 @@
 import json
+import re
 
 from tqdm import tqdm
 import nltk
@@ -124,21 +125,21 @@ def check_json(text):
     return 1
 
 
-def get_content_score(client, item):
-    prompt = build_content_score_prompt(item)
-    response = client.generate_response(prompt)
-    json_str = extract_json(response)
-    try:
-        json_response = json.loads(json_str)
-        score = json_response['overall_score']
-    except BaseException as e:
-        print("Response formant error")
-        print(e)
-        print(response)
-        print('#' * 20)
-        print(json_str)
-        score = -1
-    return score
+# def get_content_score(client, item):
+#     prompt = build_content_score_prompt(item)
+#     response = client.generate_response(prompt)
+#     json_str = extract_json(response)
+#     try:
+#         json_response = json.loads(json_str)
+#         score = json_response['overall_score']
+#     except BaseException as e:
+#         print("Response formant error")
+#         print(e)
+#         print(response)
+#         print('#' * 20)
+#         print(json_str)
+#         score = -1
+#     return score
 
 def check_cot(client, text):
     prompt = CHECK_COT_PROMPT
@@ -188,6 +189,27 @@ def check_choice(text, choice=['student', 'teacher', 'doctor', 'police', 'engine
             return 1
     return 0
 
+def check_answer_format(text):
+    # 提取{}中间的值，多个匹配，取最后一个
+    # 必须text的开头或者最后包含{}
+    text = text.strip()
+    reg = r'\{(.*?)\}'
+    if text.startswith('{'):
+        # 找到第一个 }
+        idx = text.find('}')
+        if idx != -1:
+            return 1
+
+    # 检查是否以 } 结尾，并且前面有 {
+    if text.endswith('}'):
+        idx = text.rfind('{')
+        if idx != -1 and idx < len(text) - 1:
+            return 1
+
+    return 0
+    
+
+
 def ifeval_metric_v1(client, data):
     total_if_rate = 0
     total_content_score = 0
@@ -204,27 +226,34 @@ def ifeval_metric_v1(client, data):
             if_rate = check_length(pred)
         if category == 'Choice':
             if_rate = check_choice(pred)
+        if category == 'Answer format':
+            if_rate = check_answer_format(pred)
         if category == 'CoT':
-            response = check_cot(client, pred)
-            try:
-                result = json.loads(response)
-                if_rate = result['contain']
-            except BaseException as e:
-                print("Response formant error")
-                print(e)
-                print(response)
-                result = 0
-                if_rate_failed += 1
-                item['if_rate'] = -1
-        contain_score = get_content_score(client, item)
-        if contain_score == -1:
-            item['content_score'] = -1
             content_failed += 1
-            contain_score = 0
-        else:
-            item['content_score'] = contain_score
+            if_rate_failed += 1
+            continue
+            # response = check_cot(client, pred)
+            # try:
+            #     result = json.loads(response)
+            #     if_rate = result['contain']
+            # except BaseException as e:
+            #     print("Response formant error")
+            #     print(e)
+            #     print(response)
+            #     result = 0
+            #     if_rate_failed += 1
+            #     item['if_rate'] = -1
+        # contain_score = get_content_score(client, item)
+        # if contain_score == -1:
+        #     item['content_score'] = -1
+        #     content_failed += 1
+        #     contain_score = 0
+        # else:
+        #     item['content_score'] = contain_score
+        if if_rate != 1:
+            print(item)
         item['if_rate'] = if_rate
-        total_content_score += contain_score
+        # total_content_score += contain_score
         total_if_rate += if_rate
     
     avg_score = total_content_score / (len(data) - content_failed)

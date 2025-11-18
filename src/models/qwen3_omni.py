@@ -36,9 +36,10 @@ class Qwen3Omni(BaseModel):
                                  thinker_return_dict_in_generate=True,
                                  use_audio_in_video=False)
         
-        response = self.processor.batch_decode(text_ids.sequences[:, inputs["input_ids"].shape[1] :],
+        output = self.processor.batch_decode(text_ids[:, inputs["input_ids"].shape[1] :],
                               skip_special_tokens=True,
                               clean_up_tokenization_spaces=False)
+        response = output[0]
         print(response)
         return response
 
@@ -70,9 +71,10 @@ class Qwen3Omni(BaseModel):
 
         # response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
 
-        response = self.processor.batch_decode(text_ids.sequences[:, inputs["input_ids"].shape[1] :],
+        output = self.processor.batch_decode(text_ids[:, inputs["input_ids"].shape[1] :],
                               skip_special_tokens=True,
                               clean_up_tokenization_spaces=False)
+        response = output[0]
         print(response)
         return response
     
@@ -80,7 +82,7 @@ class Qwen3Omni(BaseModel):
         audio = item['audio']
         sr = item['sr']
         prompt = item['instruction']
-        if task == 'speech_instruct_asr':
+        if task == 'speech_instruct_asr' or task == 'ifeval_v1_s':
             pred = self.chat_mode(audio, sr)
         else:
             pred = self.prompt_mode(prompt, audio, sr)

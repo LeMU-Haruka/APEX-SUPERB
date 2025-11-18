@@ -13,7 +13,6 @@ TASK_LIST = [
     # basic tasks
     "asr_commonvoice",
     "asr_librispeech",
-
     "dialogue_ser",
     "emotion_recognition",
 
@@ -25,18 +24,23 @@ TASK_LIST = [
     "text_multi_instruction_ASR",
     "speech_multi_instruction_asr",  
     "ifeval",
+    'ifeval_v1',
+    'ifeval_v1_s',
 
     # input robustness tasks
     "librispeech_noise",
     "librispeech_emotion",
     "librispeech_speed",
     "librispeech_multispeaker",
+    "librispeech_samespeaker",
 
     
     # QA and reasoning tasks
     "gsm8k",
     "alpaca_empathy",
     "mmlu",
+    "mmlu_w_choice",
+    'mmlu_origin',
     "alpaca_eval",
     "speaker_role",
     "mmau",
@@ -46,7 +50,8 @@ TASK_LIST = [
     'advbench_v1',
     'advbench',
     'text_instruction_asr_v1',
-    'text_instruction_qa'
+    'text_instruction_qa',
+    'instruction_robustness_asr',
 ]
 
 def create_few_shot_prompt(task):
@@ -99,6 +104,8 @@ class HFDataset(Dataset):
         item['audio'] = array
         item['kargs'] = {}
         item['task'] = self.task
+        item['instruction'] = item['instruction']
+        # + ' Output answer with the0 format "Answer: <answer>"'
         for key in item.keys():
             if key not in ['audio', 'instruction', 'file', 'text', 'label', 'kargs', 'sr']:
                 item['kargs'][key] = item[key]
