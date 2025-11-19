@@ -37,11 +37,11 @@ class InstructionRobustnessEvaluator(Evaluator):
             original.append(item['pred'])
             targets.append(item['target'])
         scores = self.metric(preds, targets)
-        for s, i in zip(scores['similarity_score'], data):
+        for s, i in zip(scores['similarity_scores'], data):
             i['aligned_sim'] = s
         if self.is_align:
             scores_origin = self.metric(original, targets)
-            for s, i in zip(scores_origin['similarity_score'], data):
+            for s, i in zip(scores_origin['similarity_scores'], data):
                 i['origin_sim'] = s
         self.save_cache(data)
         return {
