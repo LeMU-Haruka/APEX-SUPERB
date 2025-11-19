@@ -99,7 +99,7 @@ def instruction_robustness_metric(preds, targets):
     for p, t in tqdm(zip(preds, targets), total=len(preds), desc="Calculating Instruction Robustness"):
         similarity = success_rate(p, t)
         cache.append(similarity)
-        if similarity < 0.7:
+        if similarity < 0.6:
             success += 1
     print(f"Success rate is {success/len(preds):.3f}")
     # 返回dict格式
