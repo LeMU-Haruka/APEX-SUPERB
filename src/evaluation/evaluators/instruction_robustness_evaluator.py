@@ -48,6 +48,5 @@ class InstructionRobustnessEvaluator(Evaluator):
                 'model': self.model_name,
                 'meta_file': self.meta_file,
                 'task': self.task,
-                'score': scores,
-                'origin_score': scores_origin,
+                'score': scores['success_rate'],
             }
