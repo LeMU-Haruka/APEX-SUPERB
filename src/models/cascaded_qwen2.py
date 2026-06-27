@@ -5,7 +5,7 @@ from src.models.base_model import BaseModel
 
 
 class CascadedQwen2(BaseModel):
-    def __init__(self, llm_path='Qwen/Qwen2-7B-Instruct', whisper_path='openai/whisper-large-v3'):
+    def __init__(self, llm_path='Qwen/Qwen2-7B-Instruct', whisper_path='/private/models/whisper-large-v3'):
         self.asr_device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.llm_device = torch.device("cuda:1")
         print(f"ASR device: {self.asr_device}, LLM device: {self.llm_device}")

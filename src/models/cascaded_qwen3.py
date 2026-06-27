@@ -4,8 +4,8 @@ from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq, pipeline, Aut
 from src.models.base_model import BaseModel
 
 
-class CascadedLlama3(BaseModel):
-    def __init__(self, llm_path='Qwen/Qwen2-Audio-7B-Instruct', whisper_path='/private/models/whisper-large-v3'):
+class CascadedQwen3(BaseModel):
+    def __init__(self, llm_path='Qwen/Qwen3-8B', whisper_path='openai/whisper-large-v3'):
         self.asr_device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.llm_device = torch.device("cuda:1")
         print(f"ASR device: {self.asr_device}, LLM device: {self.llm_device}")
@@ -47,27 +47,40 @@ class CascadedLlama3(BaseModel):
         result = self.asr_pipe(audio)
         transcription = result["text"]
         return transcription
+    
 
     def prompt_fomat(self, prompt, question):
         messages = [
-            {"role": "system",
-            "content": "You are a concise, knowledgeable assistant."},
-            {"role": "user",
-            "content": "### Task Instruction\n" + prompt + "\n\n### Question\n" + question},
+            {"role": "user", "content": prompt + " " + question}
         ]
-        prompt_ids = self.tokenizer.apply_chat_template(
-            messages, add_generation_prompt=True, return_tensors="pt"
-        ).to(self.model.device)
-        return prompt_ids 
-
-    def generate(self, prompt):
-        out_ids = self.model.generate(
-            prompt,
-            max_new_tokens=1024,
-            eos_token_id=self.tokenizer.eos_token_id,
+        text = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True,
+            enable_thinking=True
         )
-        response = self.tokenizer.decode(out_ids[0][prompt.shape[-1]:], skip_special_tokens=True)
-        return response
+        model_inputs = self.tokenizer([text], return_tensors="pt").to(self.llm_device)
+        return model_inputs 
+
+    def generate(self, model_inputs):
+        generated_ids = self.model.generate(
+            model_inputs.input_ids,
+            max_new_tokens=32768,
+            eos_token_id=self.tokenizer.eos_token_id,   # <|eot_id|>
+        )
+        output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
+        try:
+            # rindex finding 151668 (</think>)
+            index = len(output_ids) - output_ids[::-1].index(151668)
+        except ValueError:
+            index = 0
+
+        thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
+        content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+
+        # response = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        # print(response.strip())
+        return content
                 
             
     def chat_mode(
@@ -88,6 +101,24 @@ class CascadedLlama3(BaseModel):
             max_new_tokens=1024,
     ):
         asr_text = self.asr(audio, sr)
+        # prompt = prompt + ' The question is: ' + asr_text + '\nAnswer: '
         prompt = self.prompt_fomat(prompt, asr_text)
         response = self.generate(prompt)
+        return response
+
+
+    def text_mode(self, prompt, text, max_new_tokens=1024):
+        content = [{"type": "text", "text": text}]
+        conversation = [
+            {"role": "user", "content": content},
+        ]
+        inputs = self.processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
+
+        inputs = self.processor(text=inputs, audios=None, return_tensors="pt", padding=True)
+        inputs = inputs.to("cuda")
+
+        generate_ids = self.model.generate(**inputs, max_length=1024)
+        generate_ids = generate_ids[:, inputs.input_ids.size(1):]
+
+        response = self.processor.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
         return response

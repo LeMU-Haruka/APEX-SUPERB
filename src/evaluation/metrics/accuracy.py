@@ -55,8 +55,12 @@ def accuracy_metric_with_llm(client, data):
     for item in tqdm(data, total=len(data), desc="Accuracy with LLM"):
         prompt = build_prompt(item)
         response = client.generate_response(prompt)
-        json_str = extract_json(response)
         item['metric_response'] = response
+        json_str = extract_json(response) if response is not None else None
+        if json_str is None:
+            item['is_same'] = -1
+            failed += 1
+            continue
         try:
             is_same = json.loads(json_str)['is_same']
             item['is_same'] = is_same
@@ -71,7 +75,7 @@ def accuracy_metric_with_llm(client, data):
             continue
         correct += is_same
     print(f'Total failed item is {failed}')
-    return correct / (len(data) - failed)
+    return correct / (len(data) - failed) if len(data) > failed else 0.0
 
 def build_prompt(item):
     prompt = ACCURACY_PROMPT
